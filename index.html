@@ -1,0 +1,4169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BALONMANO VILLAFRANCA DE LOS CABALLEROS - HHB Analytics</title>
+    <!-- jsPDF para exportar a PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- html2pdf.js para exportar HTML a PDF manteniendo formato -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 10px;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 12px 15px;
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .main-panel {
+            display: grid;
+            grid-template-columns: 1fr 300px 1fr;
+            gap: 12px;
+            padding: 12px;
+            min-height: 650px;
+        }
+
+        .team-section {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .team-header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 12px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .team-name-input {
+            width: 100%;
+            padding: 6px;
+            border: none;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            text-align: center;
+            border-radius: 4px;
+            margin-top: 8px;
+            font-size: 12px;
+        }
+
+        .button-group {
+            margin-bottom: 10px;
+        }
+
+        .group-title {
+            font-size: 9px;
+            font-weight: bold;
+            color: #666;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin-bottom: 5px;
+        }
+
+        .action-btn {
+            flex: 1;
+            min-width: 65px;
+            padding: 5px 7px;
+            border: none;
+            border-radius: 6px;
+            font-size: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .action-btn.active {
+            transform: scale(0.95);
+        }
+
+        .btn-attack { background: #4CAF50; color: white; }
+        .btn-position { background: #FF9800; color: white; }
+        .btn-result { background: #2196F3; color: white; }
+        .btn-negative { background: #f44336; color: white; }
+        .btn-neutral { background: #607D8B; color: white; }
+        .btn-rechace { background: #9C27B0; color: white; }
+        .btn-2x2 { background: #E91E63; color: white; }
+        .btn-defense { background: #795548; color: white; }
+        .btn-goalkeeper { background: #00BCD4; color: white; }
+
+        .goalkeeper-section {
+            background: linear-gradient(135deg, #00BCD4 0%, #00ACC1 100%);
+            border-radius: 8px;
+            padding: 8px;
+            margin-bottom: 10px;
+        }
+
+        .goalkeeper-title {
+            color: white;
+            font-size: 9px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            text-align: center;
+        }
+
+        .goalkeeper-horizontal-section {
+            background: linear-gradient(135deg, #00BCD4 0%, #00ACC1 100%);
+            border-radius: 12px;
+            padding: 8px 15px;
+            margin: 12px;
+            box-shadow: 0 4px 12px rgba(0,188,212,0.2);
+        }
+
+        .goalkeeper-horizontal-title {
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        .goalkeeper-horizontal-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .goalkeeper-team-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .goalkeeper-team-label {
+            color: white;
+            font-size: 9px;
+            font-weight: bold;
+            text-transform: uppercase;
+            min-width: 60px;
+            text-align: center;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.2);
+        }
+
+        .goalkeeper-players-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .goalkeeper-player-horizontal {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .goalkeeper-name-input-horizontal {
+            width: 70px;
+            padding: 2px 4px;
+            border: none;
+            border-radius: 3px;
+            font-size: 7px;
+            background: rgba(255,255,255,0.9);
+            color: #333;
+            font-weight: 500;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        .goalkeeper-name-input-horizontal:focus {
+            outline: none;
+            background: white;
+            box-shadow: 0 0 3px rgba(255,255,255,0.5);
+        }
+
+        .goalkeeper-btn-horizontal {
+            width: 70px;
+            padding: 3px 6px;
+            border: none;
+            border-radius: 3px;
+            font-size: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.3);
+            color: white;
+            border: 2px solid transparent;
+            text-transform: uppercase;
+            white-space: nowrap;
+            box-sizing: border-box;
+        }
+
+        .goalkeeper-btn-horizontal:hover {
+            background: rgba(255,255,255,0.4);
+        }
+
+        .goalkeeper-btn-horizontal.active {
+            background: white;
+            color: #00BCD4;
+            border: 2px solid white;
+            transform: scale(1.05);
+        }
+
+        .court-representation {
+            background: #f0f8f0;
+            border: 2px solid #4CAF50;
+            border-radius: 8px;
+            height: 90px;
+            position: relative;
+            margin: 10px 0;
+        }
+
+        .position-marker {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #FFC107;
+            border: 2px solid #FF8F00;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 9px;
+        }
+
+        .position-marker:hover {
+            transform: scale(1.1);
+        }
+
+        .position-marker.active {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .pos-f { top: 8px; left: 15px; }
+        .pos-d { top: 8px; right: 15px; }
+        .pos-e { top: 32px; left: 50%; transform: translate(-50%, -50%); }
+        .pos-a { bottom: 22px; left: 15px; }
+        .pos-b { bottom: 8px; left: 50%; transform: translateX(-50%); }
+        .pos-c { bottom: 22px; right: 15px; }
+
+        .center-section {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .timer-section {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            box-shadow: 0 6px 15px rgba(44, 62, 80, 0.3);
+        }
+
+        .timer-header {
+            font-size: 11px;
+            margin-bottom: 8px;
+            color: #ecf0f1;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .timer-display {
+            font-size: 28px;
+            font-weight: bold;
+            color: #e74c3c;
+            margin-bottom: 12px;
+            font-family: 'Courier New', monospace;
+            text-shadow: 0 0 8px rgba(231, 76, 60, 0.5);
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+
+        .timer-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 9px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 50px;
+        }
+
+        .timer-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+        }
+
+        .timer-btn.start { background: #27ae60; }
+        .timer-btn.pause { background: #f39c12; }
+        .timer-btn.reset { background: #e74c3c; }
+        .timer-btn.back { background: #9b59b6; }
+        .timer-btn.forward { background: #9b59b6; }
+
+        .timer-status {
+            font-size: 9px;
+            color: #bdc3c7;
+            margin-top: 6px;
+        }
+
+        .scoreboard {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .scoreboard-header {
+            font-size: 11px;
+            margin-bottom: 8px;
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .score-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .team-score {
+            font-size: 32px;
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        .score-separator {
+            font-size: 24px;
+            color: #666;
+            margin: 0 15px;
+        }
+
+        .team-names {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: #ccc;
+        }
+
+        /* NUEVAS CLASES PARA EL SISTEMA DE ALERTAS */
+        .stats-ticker {
+            background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+            border-radius: 8px;
+            margin-top: 8px;
+            overflow: hidden;
+            height: 50px;
+            position: relative;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .ticker-header {
+            background: rgba(52, 73, 94, 0.9);
+            color: #ecf0f1;
+            font-size: 8px;
+            font-weight: bold;
+            text-transform: uppercase;
+            padding: 3px 8px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .ticker-content {
+            height: 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ticker-item {
+            position: absolute;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            color: white;
+            text-align: center;
+            padding: 0 8px;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.5s ease-in-out;
+        }
+
+        .ticker-item.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .ticker-item.exit {
+            opacity: 0;
+            transform: translateX(-100%);
+        }
+
+        .stat-value-positive {
+            color: #4CAF50;
+        }
+
+        .stat-value-negative {
+            color: #f44336;
+        }
+
+        .stat-value-neutral {
+            color: #FFC107;
+        }
+
+        .stat-highlight {
+            background: rgba(255,255,255,0.1);
+            padding: 2px 6px;
+            border-radius: 3px;
+            margin: 0 2px;
+        }
+
+        .trend-indicator {
+            font-size: 8px;
+            margin-left: 4px;
+        }
+
+        .trend-up { color: #4CAF50; }
+        .trend-down { color: #f44336; }
+        .trend-equal { color: #FFC107; }
+
+        .stats-table {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .stats-header {
+            background: #4CAF50;
+            color: white;
+            padding: 8px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 11px;
+        }
+
+        .stats-content {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .stat-row {
+            display: grid;
+            grid-template-columns: 1fr 45px 45px 1fr;
+            align-items: center;
+            padding: 4px 8px;
+            border-bottom: 1px solid #eee;
+            font-size: 9px;
+        }
+
+        .stat-row:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .stat-label {
+            font-weight: 500;
+            text-align: right;
+            padding-right: 6px;
+        }
+
+        .stat-value {
+            text-align: center;
+            font-weight: bold;
+            padding: 3px;
+            border-radius: 3px;
+            margin: 0 1px;
+        }
+
+        .stat-value.good { background: #4CAF50; color: white; }
+        .stat-value.bad { background: #f44336; color: white; }
+        .stat-value.neutral { background: #e0e0e0; color: #333; }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .main-action-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .register-btn {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+        }
+
+        .report-btn {
+            background: linear-gradient(135deg, #FF9800 0%, #f57c00 100%);
+            color: white;
+        }
+
+        .undo-btn {
+            background: #9E9E9E;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 9px;
+            font-weight: bold;
+            cursor: not-allowed;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            margin-top: 8px;
+        }
+
+        .undo-btn:not(:disabled) {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+            cursor: pointer;
+            box-shadow: 0 3px 6px rgba(244, 67, 54, 0.3);
+        }
+
+        .undo-btn:not(:disabled):hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(244, 67, 54, 0.4);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 2% auto;
+            padding: 20px;
+            border-radius: 15px;
+            width: 95%;
+            max-width: 1200px;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #FF9800 0%, #f57c00 100%);
+            color: white;
+            padding: 15px;
+            margin: -20px -20px 20px -20px;
+            border-radius: 15px 15px 0 0;
+            font-size: 20px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .close {
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+
+        .print-btn, .pdf-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+
+        .pdf-btn {
+            background: #f44336;
+        }
+
+        .print-btn:hover, .pdf-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+        }
+
+        .report-container {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.4;
+            color: #333;
+        }
+
+        .report-title {
+            background: #2c3e50;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+
+        .report-section {
+            margin-bottom: 25px;
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        .section-title {
+            background: #34495e;
+            color: white;
+            padding: 10px 15px;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            border-radius: 5px;
+            page-break-after: avoid;
+        }
+
+        .subsection-title {
+            background: #7f8c8d;
+            color: white;
+            padding: 8px 12px;
+            font-size: 14px;
+            font-weight: bold;
+            margin: 15px 0 10px 0;
+            border-radius: 3px;
+            page-break-after: avoid;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            border: 2px solid #2c3e50;
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        .comparison-table th {
+            background: #2c3e50;
+            color: white;
+            padding: 12px 8px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .comparison-table td {
+            padding: 10px 8px;
+            text-align: center;
+            border: 1px solid #ddd;
+            font-size: 12px;
+        }
+
+        .comparison-table tbody tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .better-value {
+            background: #d4edda !important;
+            color: #155724;
+            font-weight: bold;
+        }
+
+        .worse-value {
+            background: #f8d7da !important;
+            color: #721c24;
+            font-weight: bold;
+        }
+
+        .team-analysis-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            border: 1px solid #dee2e6;
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        .team-analysis-table th {
+            background: #6c757d;
+            color: white;
+            padding: 8px;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        .team-analysis-table td {
+            padding: 6px 8px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+            font-size: 11px;
+        }
+
+        .team-analysis-table tbody tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .timeline-container {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        .timeline-header {
+            background: #e74c3c;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .timeline-goals {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .goal-marker {
+            background: #4CAF50;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+
+        .goal-marker.team-b {
+            background: #2196F3;
+        }
+
+        .time-intervals-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+            border: 2px solid #e74c3c;
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        .time-intervals-table th {
+            background: #e74c3c;
+            color: white;
+            padding: 10px 8px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .time-intervals-table td {
+            padding: 8px;
+            text-align: center;
+            border: 1px solid #ddd;
+            font-size: 11px;
+        }
+
+        .time-intervals-table tbody tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .timeout-card {
+            background: white;
+            border: 2px solid #607D8B;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .timeout-header {
+            background: #607D8B;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            margin: -15px -15px 12px -15px;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        .timeout-info {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .timeout-info-item {
+            text-align: center;
+        }
+
+        .timeout-info-label {
+            font-size: 10px;
+            color: #666;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .timeout-info-value {
+            font-size: 14px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        .timeout-events {
+            background: #f8f9fa;
+            border-radius: 5px;
+            padding: 10px;
+        }
+
+        .timeout-events-title {
+            font-size: 11px;
+            font-weight: bold;
+            color: #607D8B;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .timeout-event-item {
+            padding: 6px;
+            margin-bottom: 4px;
+            background: white;
+            border-left: 3px solid #607D8B;
+            border-radius: 3px;
+            font-size: 10px;
+        }
+
+        .timeout-impact {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px dashed #ddd;
+        }
+
+        .timeout-impact-item {
+            text-align: center;
+        }
+
+        .timeout-impact-label {
+            font-size: 10px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .timeout-impact-value {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .timeout-impact-positive {
+            color: #4CAF50;
+        }
+
+        .timeout-impact-negative {
+            color: #f44336;
+        }
+
+        .timeout-impact-neutral {
+            color: #FF9800;
+        }
+
+        .pdf-export-content {
+            background: white !important;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+            color: #333 !important;
+            padding: 20px !important;
+        }
+
+        @media print {
+            body {
+                background: white !important;
+                padding: 0 !important;
+            }
+            
+            .modal {
+                display: block !important;
+                position: static !important;
+                background: none !important;
+            }
+            
+            .modal-content {
+                margin: 0 !important;
+                padding: 0 !important;
+                border-radius: 0 !important;
+                box-shadow: none !important;
+                max-height: none !important;
+                overflow: visible !important;
+                width: 100% !important;
+                max-width: none !important;
+            }
+            
+            .modal-header {
+                margin: 0 0 20px 0 !important;
+                border-radius: 0 !important;
+                page-break-after: avoid;
+            }
+            
+            .print-btn, .pdf-btn, .close {
+                display: none !important;
+            }
+            
+            .modal-actions {
+                display: none !important;
+            }
+            
+            .report-section {
+                page-break-inside: avoid;
+            }
+            
+            .comparison-table, .team-analysis-table, .time-intervals-table {
+                page-break-inside: avoid;
+            }
+            
+            .section-title {
+                page-break-after: avoid;
+            }
+        }
+
+        .pdf-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            z-index: 1001;
+            animation: slideIn 0.3s ease;
+        }
+
+        .pdf-status.success {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .pdf-status.error {
+            background: #f44336;
+            color: white;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            BALONMANO VILLAFRANCA DE LOS CABALLEROS - HHB Analytics
+        </div>
+        
+        <div class="main-panel">
+            <!-- Equipo A -->
+            <div class="team-section">
+                <div class="team-header">
+                    EQUIPO A (LOCAL)
+                    <input type="text" class="team-name-input" placeholder="Nombre del Equipo A" id="teamAName">
+                </div>
+                
+
+                
+                <div class="button-group">
+                    <div class="group-title">Tipo de Ataque</div>
+                    <div class="button-row">
+                        <button class="action-btn btn-attack" data-team="A" data-action="contraataque">Contraataque</button>
+                        <button class="action-btn btn-attack" data-team="A" data-action="posicional">Posicional</button>
+                    </div>
+                    <div class="button-row">
+                        <button class="action-btn btn-attack" data-team="A" data-action="posicional_7x6">Posicional 7x6</button>
+                        <button class="action-btn btn-attack" data-team="A" data-action="campo_contrario">Campo Contrario</button>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <div class="group-title">Defensa Rival</div>
+                    <div class="button-row">
+                        <button class="action-btn btn-defense" data-team="A" data-action="defensa_6_0">6:0</button>
+                        <button class="action-btn btn-defense" data-team="A" data-action="defensa_5_1">5:1</button>
+                        <button class="action-btn btn-defense" data-team="A" data-action="defensa_otros">Otros</button>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <div class="group-title">Zona de Lanzamiento</div>
+                    <div class="button-row">
+                        <button class="action-btn btn-position" data-team="A" data-action="6m">6M</button>
+                        <button class="action-btn btn-position" data-team="A" data-action="9m">9M</button>
+                        <button class="action-btn btn-position" data-team="A" data-action="7m">7M</button>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <div class="group-title">Resultado del Lanzamiento</div>
+                    <div class="button-row">
+                        <button class="action-btn btn-result" data-team="A" data-action="gol">Gol</button>
+                        <button class="action-btn btn-result" data-team="A" data-action="parada">Parada</button>
+                        <button class="action-btn btn-result" data-team="A" data-action="poste_fuera">Poste/Fuera</button>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <div class="group-title">Tipo de Lanzamiento</div>
+                    <div class="button-row">
+                        <button class="action-btn btn-attack" data-team="A" data-action="salto">Salto</button>
+                        <button class="action-btn btn-attack" data-team="A" data-action="apoyo">Apoyo</button>
+                    </div>
+                    <div class="button-row">
+                        <button class="action-btn btn-attack" data-team="A" data-action="penetración">Penetración</button>
+                        <button class="action-btn btn-attack" data-team="A" data-action="finta">Finta</button>
+                    </div>
+                    <div class="button-row">
+                        <button class="action-btn btn-attack" data-team="A" data-action="habilidad">Habilidad</button>
+                        <button class="action-btn btn-attack" data-team="A" data-action="fly">Fly</button>
+                    </div>
+                </div>
+
+                <div class="court-representation">
+                    <div class="position-marker pos-a" data-team="A" data-position="A">A</div>
+                    <div class="position-marker pos-b" data-team="A" data-position="B">B</div>
+                    <div class="position-marker pos-c" data-team="A" data-position="C">C</div>
+                    <div class="position-marker pos-d" data-team="A" data-position="D">D</div>
+                    <div class="position-marker pos-e" data-team="A" data-position="E">E</div>
+                    <div class="position-marker pos-f" data-team="A" data-position="F">F</div>
+                </div>
+
+                <div class="button-group">
+                    <div class="group-title">Situación Numérica</div>
+                    <div class="button-row">
+                        <button class="action-btn btn-neutral" data-team="A" data-action="superioridad">Superioridad</button>
+                        <button class="action-btn btn-neutral" data-team="A" data-action="igualdad">Igualdad</button>
+                    </div>
+                    <div class="button-row">
+                        <button class="action-btn btn-neutral" data-team="A" data-action="inferioridad">Inferioridad</button>
+                        <button class="action-btn btn-2x2" data-team="A" data-action="2x2">2x2</button>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <div class="group-title">Acciones Negativas</div>
+                    <div class="button-row">
+                        <button class="action-btn btn-negative" data-team="A" data-action="perdida">Pérdida</button>
+                        <button class="action-btn btn-negative" data-team="A" data-action="error_tecnico">Error Técnico</button>
+                        <button class="action-btn btn-negative" data-team="A" data-action="exclusion">Exclusión</button>
+                    </div>
+                    <div class="button-row">
+                        <button class="action-btn btn-rechace" data-team="A" data-action="rechace">Rechace</button>
+                        <button class="action-btn btn-negative" data-team="A" data-action="golpe_franco">Golpe Franco</button>
+                        <button class="action-btn btn-neutral" data-team="A" data-action="time_out">Time Out</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección Central -->
+            <div class="center-section">
+                <!-- Cronómetro -->
+                <div class="timer-section">
+                    <div class="timer-header">CRONÓMETRO</div>
+                    <div class="timer-display" id="timerDisplay">00:00</div>
+                    <div class="timer-controls">
+                        <button class="timer-btn start" id="startBtn" onclick="startTimer()">Inicio</button>
+                        <button class="timer-btn pause" id="pauseBtn" onclick="pauseTimer()">Pausa</button>
+                        <button class="timer-btn reset" id="resetBtn" onclick="resetTimer()">Reiniciar</button>
+                        <button class="timer-btn back" onclick="adjustTimer(-10)">-10s</button>
+                        <button class="timer-btn forward" onclick="adjustTimer(10)">+10s</button>
+                    </div>
+                    <div class="timer-status" id="timerStatus">Cronómetro detenido</div>
+                </div>
+
+                <!-- Marcador -->
+                <div class="scoreboard">
+                    <div class="scoreboard-header">MARCADOR</div>
+                    <div class="team-names">
+                        <span id="teamADisplay">EQUIPO A</span>
+                        <span id="teamBDisplay">EQUIPO B</span>
+                    </div>
+                    <div class="score-display">
+                        <span class="team-score" id="scoreA">0</span>
+                        <span class="score-separator">-</span>
+                        <span class="team-score" id="scoreB">0</span>
+                    </div>
+                    
+                    <!-- NUEVO: Sistema de alertas ticker -->
+                    <div class="stats-ticker">
+                        <div class="ticker-header">ESTADÍSTICAS EN TIEMPO REAL</div>
+                        <div class="ticker-content" id="tickerContent">
+                            <div class="ticker-item active" id="tickerItem0">Esperando datos...</div>
+                            <div class="ticker-item" id="tickerItem1"></div>
+                            <div class="ticker-item" id="tickerItem2"></div>
+                            <div class="ticker-item" id="tickerItem3"></div>
+                            <div class="ticker-item" id="tickerItem4"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-table">
+                    <div class="stats-header">ESTADÍSTICAS EN TIEMPO REAL</div>
+                    <div class="stats-content" id="statsContent"></div>
+                </div>
+
+                <div class="action-buttons">
+                    <button class="main-action-btn register-btn" onclick="registerEvent()">Registrar Evento</button>
+                    <button class="main-action-btn report-btn" onclick="showReport()">Informe Ejecutivo</button>
+                </div>
+                
+                <div style="text-align: center;">
+                    <button id="undoBtn" class="undo-btn" onclick="undoLastEvent()" disabled>
+                        ↶ Deshacer Último
+                    </button>
+                </div>
+            </div>
+
+            <!-- Equipo B -->
+            <div class="team-section">
+                <div class="team-header">
+                    EQUIPO B (VISITANTE)
+                    <input type="text" class="team-name-input" placeholder="Nombre del Equipo B" id="teamBName">
+                </div>
+                
+
+                
+                <div class="button-group">
+                    <div class="group-title">Tipo de Ataque</div>
+                    <div class="button-row">
+                        <button class="action-btn btn-attack" data-team="B" data-action="contraataque">Contraataque</button>
+                        <button class="action-btn btn-attack" data-team="B" data-action="posicional">Posicional</button>
+                    </div>
+                    <div class="button-row">
+                        <button class="action-btn btn-attack" data-team="B" data-action="posicional_7x6">Posicional 7x6</button>
+                        <button class="action-btn btn-attack" data-team="B" data-action="campo_contrario">Campo Contrario</button>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <div class="group-title">Defensa Rival</div>
+                    <div class="button-row">
+                        <button class="action-btn btn-defense" data-team="B" data-action="defensa_6_0">6:0</button>
+                        <button class="action-btn btn-defense" data-team="B" data-action="defensa_5_1">5:1</button>
+                        <button class="action-btn btn-defense" data-team="B" data-action="defensa_otros">Otros</button>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <div class="group-title">Zona de Lanzamiento</div>
+                    <div class="button-row">
+                        <button class="action-btn btn-position" data-team="B" data-action="6m">6M</button>
+                        <button class="action-btn btn-position" data-team="B" data-action="9m">9M</button>
+                        <button class="action-btn btn-position" data-team="B" data-action="7m">7M</button>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <div class="group-title">Resultado del Lanzamiento</div>
+                    <div class="button-row">
+                        <button class="action-btn btn-result" data-team="B" data-action="gol">Gol</button>
+                        <button class="action-btn btn-result" data-team="B" data-action="parada">Parada</button>
+                        <button class="action-btn btn-result" data-team="B" data-action="poste_fuera">Poste/Fuera</button>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <div class="group-title">Tipo de Lanzamiento</div>
+                    <div class="button-row">
+                        <button class="action-btn btn-attack" data-team="B" data-action="salto">Salto</button>
+                        <button class="action-btn btn-attack" data-team="B" data-action="apoyo">Apoyo</button>
+                    </div>
+                    <div class="button-row">
+                        <button class="action-btn btn-attack" data-team="B" data-action="penetración">Penetración</button>
+                        <button class="action-btn btn-attack" data-team="B" data-action="finta">Finta</button>
+                    </div>
+                    <div class="button-row">
+                        <button class="action-btn btn-attack" data-team="B" data-action="habilidad">Habilidad</button>
+                        <button class="action-btn btn-attack" data-team="B" data-action="fly">Fly</button>
+                    </div>
+                </div>
+
+                <div class="court-representation">
+                    <div class="position-marker pos-a" data-team="B" data-position="A">A</div>
+                    <div class="position-marker pos-b" data-team="B" data-position="B">B</div>
+                    <div class="position-marker pos-c" data-team="B" data-position="C">C</div>
+                    <div class="position-marker pos-d" data-team="B" data-position="D">D</div>
+                    <div class="position-marker pos-e" data-team="B" data-position="E">E</div>
+                    <div class="position-marker pos-f" data-team="B" data-position="F">F</div>
+                </div>
+
+                <div class="button-group">
+                    <div class="group-title">Situación Numérica</div>
+                    <div class="button-row">
+                        <button class="action-btn btn-neutral" data-team="B" data-action="superioridad">Superioridad</button>
+                        <button class="action-btn btn-neutral" data-team="B" data-action="igualdad">Igualdad</button>
+                    </div>
+                    <div class="button-row">
+                        <button class="action-btn btn-neutral" data-team="B" data-action="inferioridad">Inferioridad</button>
+                        <button class="action-btn btn-2x2" data-team="B" data-action="2x2">2x2</button>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <div class="group-title">Acciones Negativas</div>
+                    <div class="button-row">
+                        <button class="action-btn btn-negative" data-team="B" data-action="perdida">Pérdida</button>
+                        <button class="action-btn btn-negative" data-team="B" data-action="error_tecnico">Error Técnico</button>
+                        <button class="action-btn btn-negative" data-team="B" data-action="exclusion">Exclusión</button>
+                    </div>
+                    <div class="button-row">
+                        <button class="action-btn btn-rechace" data-team="B" data-action="rechace">Rechace</button>
+                        <button class="action-btn btn-negative" data-team="B" data-action="golpe_franco">Golpe Franco</button>
+                        <button class="action-btn btn-neutral" data-team="B" data-action="time_out">Time Out</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SECCIÓN HORIZONTAL DE PORTEROS -->
+        <div class="goalkeeper-horizontal-section">
+            <div class="goalkeeper-horizontal-title">🥅 CONTROL DE PORTEROS</div>
+            <div class="goalkeeper-horizontal-container">
+                <!-- Equipo A -->
+                <div class="goalkeeper-team-section">
+                    <div class="goalkeeper-team-label" id="teamAGoalkeeperDisplay">EQUIPO A</div>
+                    <div class="goalkeeper-players-row">
+                        <div class="goalkeeper-player-horizontal">
+                            <input type="text" class="goalkeeper-name-input-horizontal" id="teamAGoalkeeper1Name" placeholder="Portero 1" value="Portero 1">
+                            <button class="goalkeeper-btn-horizontal" data-team="A" data-goalkeeper="1" onclick="selectGoalkeeper(this)">EN CAMPO</button>
+                        </div>
+                        <div class="goalkeeper-player-horizontal">
+                            <input type="text" class="goalkeeper-name-input-horizontal" id="teamAGoalkeeper2Name" placeholder="Portero 2" value="Portero 2">
+                            <button class="goalkeeper-btn-horizontal" data-team="A" data-goalkeeper="2" onclick="selectGoalkeeper(this)">EN CAMPO</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Separador visual -->
+                <div style="width: 2px; height: 40px; background: rgba(255,255,255,0.3); border-radius: 1px;"></div>
+                
+                <!-- Equipo B -->
+                <div class="goalkeeper-team-section">
+                    <div class="goalkeeper-team-label" id="teamBGoalkeeperDisplay">EQUIPO B</div>
+                    <div class="goalkeeper-players-row">
+                        <div class="goalkeeper-player-horizontal">
+                            <input type="text" class="goalkeeper-name-input-horizontal" id="teamBGoalkeeper1Name" placeholder="Portero 1" value="Portero 1">
+                            <button class="goalkeeper-btn-horizontal" data-team="B" data-goalkeeper="1" onclick="selectGoalkeeper(this)">EN CAMPO</button>
+                        </div>
+                        <div class="goalkeeper-player-horizontal">
+                            <input type="text" class="goalkeeper-name-input-horizontal" id="teamBGoalkeeper2Name" placeholder="Portero 2" value="Portero 2">
+                            <button class="goalkeeper-btn-horizontal" data-team="B" data-goalkeeper="2" onclick="selectGoalkeeper(this)">EN CAMPO</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para el informe -->
+    <div id="reportModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                INFORME EJECUTIVO DEL PARTIDO
+                <div class="modal-actions">
+                    <button class="print-btn" onclick="window.print()">🖨️ Imprimir</button>
+                    <button class="pdf-btn" onclick="exportToVisualPDF()">📄 Exportar PDF</button>
+                    <span class="close" onclick="closeReport()">&times;</span>
+                </div>
+            </div>
+            <div id="reportContent" class="report-container"></div>
+        </div>
+    </div>
+
+    <script>
+        // Variables del cronómetro
+        let gameTimer = {
+            seconds: 0,
+            isRunning: false,
+            intervalId: null,
+            startTime: null,
+            pausedTime: 0
+        };
+
+        // NUEVAS VARIABLES PARA EL SISTEMA DE TICKER
+        let tickerStats = [];
+        let currentTickerIndex = 0;
+        let tickerInterval = null;
+        let previousStats = {};
+
+        // NUEVO: Variables para tracking de posesión
+        let possessionTracking = {
+            currentPossession: null,
+            possessionStartTime: null,
+            lastEventTime: null
+        };
+
+        // NUEVO: Márgenes de error por tipo de evento
+        const eventDelays = {
+            'gol': { mean: 2.5, stdDev: 1.0 },
+            'parada': { mean: 2.0, stdDev: 0.8 },
+            'poste_fuera': { mean: 1.5, stdDev: 0.7 },
+            'perdida': { mean: 1.8, stdDev: 0.9 },
+            'error_tecnico': { mean: 2.0, stdDev: 1.0 },
+            'exclusion': { mean: 3.0, stdDev: 1.2 },
+            'golpe_franco': { mean: 1.5, stdDev: 0.6 },
+            'time_out': { mean: 60.0, stdDev: 5.0 },
+            'default': { mean: 2.0, stdDev: 0.8 }
+        };
+
+        // Variables globales para el seguimiento del juego
+        let gameData = {
+            teamA: {
+                name: 'EQUIPO A',
+                score: 0,
+                currentGoalkeeper: null,
+                attackTime: 0,        // NUEVO
+                attackTimeRaw: 0,     // NUEVO
+                attackTimeVariance: 0, // NUEVO
+                goalkeepers: {
+                    1: { name: 'Portero 1', saves: 0, goals_conceded: 0, shots_faced: 0 },
+                    2: { name: 'Portero 2', saves: 0, goals_conceded: 0, shots_faced: 0 }
+                },
+                stats: {
+                    goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0, gf_recibidos: 0,
+                    exclusiones: 0, perdidas: 0, errores_tecnicos: 0, posesiones: 0, contraataques: 0,
+                    goles_7m: 0, lanzamientos_7m: 0, goles_superioridad: 0, goles_6m: 0, goles_9m: 0,
+                    time_outs: 0, golpes_franco: 0, rechaces: 0, goles_2x2: 0, lanzamientos_2x2: 0,
+                    ataques: {
+                        contraataque: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        posicional: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        posicional_7x6: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        campo_contrario: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 }
+                    },
+                    zonas: {
+                        '6m': { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        '9m': { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        '7m': { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 }
+                    },
+                    acciones: {
+                        salto: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        apoyo: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        penetración: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        finta: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        habilidad: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        fly: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 }
+                    },
+                    posiciones: {
+                        A: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        B: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        C: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        D: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        E: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        F: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 }
+                    },
+                    situaciones: {
+                        superioridad: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        igualdad: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        inferioridad: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        '2x2': { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 }
+                    },
+                    defensas: {
+                        defensa_6_0: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        defensa_5_1: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        defensa_otros: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 }
+                    },
+                    golpes_franco_por_posicion: { A: 0, B: 0, C: 0, D: 0, E: 0, F: 0 }
+                }
+            },
+            teamB: {
+                name: 'EQUIPO B',
+                score: 0,
+                currentGoalkeeper: null,
+                attackTime: 0,        // NUEVO
+                attackTimeRaw: 0,     // NUEVO
+                attackTimeVariance: 0, // NUEVO
+                goalkeepers: {
+                    1: { name: 'Portero 1', saves: 0, goals_conceded: 0, shots_faced: 0 },
+                    2: { name: 'Portero 2', saves: 0, goals_conceded: 0, shots_faced: 0 }
+                },
+                stats: {
+                    goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0, gf_recibidos: 0,
+                    exclusiones: 0, perdidas: 0, errores_tecnicos: 0, posesiones: 0, contraataques: 0,
+                    goles_7m: 0, lanzamientos_7m: 0, goles_superioridad: 0, goles_6m: 0, goles_9m: 0,
+                    time_outs: 0, golpes_franco: 0, rechaces: 0, goles_2x2: 0, lanzamientos_2x2: 0,
+                    ataques: {
+                        contraataque: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        posicional: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        posicional_7x6: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        campo_contrario: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 }
+                    },
+                    zonas: {
+                        '6m': { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        '9m': { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        '7m': { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 }
+                    },
+                    acciones: {
+                        salto: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        apoyo: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        penetración: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        finta: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        habilidad: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        fly: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 }
+                    },
+                    posiciones: {
+                        A: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        B: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        C: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        D: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        E: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        F: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 }
+                    },
+                    situaciones: {
+                        superioridad: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        igualdad: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        inferioridad: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        '2x2': { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 }
+                    },
+                    defensas: {
+                        defensa_6_0: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        defensa_5_1: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 },
+                        defensa_otros: { goles: 0, lanzamientos: 0, paradas: 0, poste_fuera: 0 }
+                    },
+                    golpes_franco_por_posicion: { A: 0, B: 0, C: 0, D: 0, E: 0, F: 0 }
+                }
+            },
+            events: [],
+            goals: [],
+            timeouts: [], // NUEVO: Array para almacenar time outs con contexto
+            exclusions: [] // NUEVO: Array para almacenar exclusiones con contexto de 2 minutos
+        };
+
+        let currentEvent = {
+            team: null,
+            actions: {},
+            position: null,
+            timestamp: null
+        };
+
+        // === FUNCIONES NUEVAS: TRACKING DE POSESIÓN ===
+        function updateAttackTime(currentEventTime, changePossession, eventTeam, actions) {
+            if (possessionTracking.currentPossession === null) {
+                if (eventTeam && (actions.length > 0)) {
+                    possessionTracking.currentPossession = eventTeam;
+                    possessionTracking.possessionStartTime = currentEventTime;
+                    possessionTracking.lastEventTime = currentEventTime;
+                }
+                return;
+            }
+
+            if (possessionTracking.currentPossession !== null) {
+                const attackingTeam = possessionTracking.currentPossession;
+                const team = gameData[`team${attackingTeam}`];
+                const observedInterval = currentEventTime - possessionTracking.possessionStartTime;
+                const startDelay = getEventDelay(possessionTracking.lastEventTime);
+                const endDelay = getEventDelay(currentEventTime, actions);
+                const correctedInterval = Math.max(0, observedInterval - (endDelay.mean - startDelay.mean));
+                const intervalVariance = startDelay.variance + endDelay.variance;
+                
+                team.attackTime += correctedInterval;
+                team.attackTimeRaw += observedInterval;
+                team.attackTimeVariance += intervalVariance;
+                possessionTracking.lastEventTime = currentEventTime;
+                
+                if (changePossession) {
+                    const newPossession = attackingTeam === 'A' ? 'B' : 'A';
+                    possessionTracking.currentPossession = newPossession;
+                    possessionTracking.possessionStartTime = currentEventTime;
+                }
+            }
+        }
+
+        function getEventDelay(eventTime, actions = []) {
+            if (actions && actions.length > 0) {
+                for (let action of actions) {
+                    if (eventDelays[action]) {
+                        return {
+                            mean: eventDelays[action].mean,
+                            stdDev: eventDelays[action].stdDev,
+                            variance: Math.pow(eventDelays[action].stdDev, 2)
+                        };
+                    }
+                }
+            }
+            return {
+                mean: eventDelays.default.mean,
+                stdDev: eventDelays.default.stdDev,
+                variance: Math.pow(eventDelays.default.stdDev, 2)
+            };
+        }
+
+        function calculateDefenseTime(team) {
+            const totalGameTime = gameTimer.seconds;
+            const attackTime = team.attackTime;
+            return Math.max(0, totalGameTime - attackTime);
+        }
+
+        function calculateAttackTimeStdDev(team) {
+            return Math.sqrt(team.attackTimeVariance);
+        }
+
+        function recalculateAttackTimes() {
+            gameData.teamA.attackTime = 0;
+            gameData.teamA.attackTimeRaw = 0;
+            gameData.teamA.attackTimeVariance = 0;
+            gameData.teamB.attackTime = 0;
+            gameData.teamB.attackTimeRaw = 0;
+            gameData.teamB.attackTimeVariance = 0;
+            
+            possessionTracking.currentPossession = null;
+            possessionTracking.possessionStartTime = null;
+            possessionTracking.lastEventTime = null;
+            
+            gameData.events.forEach((event) => {
+                const actions = event.actions[event.team] || [];
+                let isGoal = actions.includes('gol');
+                let isStop = actions.includes('parada');
+                let isMiss = actions.includes('poste_fuera');
+                const shouldChangePossession = isGoal || (isStop && !actions.includes('rechace')) || isMiss || actions.includes('perdida') || actions.includes('error_tecnico');
+                updateAttackTime(event.gameTime, shouldChangePossession, event.team, actions);
+            });
+        }
+
+        function generatePossessionAnalysisSection() {
+            const teamA = gameData.teamA;
+            const teamB = gameData.teamB;
+            const totalGameTime = gameTimer.seconds;
+            
+            const teamADefenseTime = calculateDefenseTime(teamA);
+            const teamBDefenseTime = calculateDefenseTime(teamB);
+            const teamAStdDev = calculateAttackTimeStdDev(teamA);
+            const teamBStdDev = calculateAttackTimeStdDev(teamB);
+            
+            const teamAAttackPercent = totalGameTime > 0 ? (teamA.attackTime / totalGameTime * 100).toFixed(1) : '0.0';
+            const teamBAttackPercent = totalGameTime > 0 ? (teamB.attackTime / totalGameTime * 100).toFixed(1) : '0.0';
+            const teamADefensePercent = totalGameTime > 0 ? (teamADefenseTime / totalGameTime * 100).toFixed(1) : '0.0';
+            const teamBDefensePercent = totalGameTime > 0 ? (teamBDefenseTime / totalGameTime * 100).toFixed(1) : '0.0';
+            
+            const possessionDiff = teamA.attackTime - teamB.attackTime;
+            const possessionDiffMin = Math.floor(Math.abs(possessionDiff) / 60);
+            const possessionDiffSec = Math.floor(Math.abs(possessionDiff) % 60);
+            const possessionDiffText = possessionDiff > 0 
+                ? `+${possessionDiffMin}:${possessionDiffSec.toString().padStart(2, '0')} a favor de ${teamA.name}`
+                : possessionDiff < 0
+                ? `+${possessionDiffMin}:${possessionDiffSec.toString().padStart(2, '0')} a favor de ${teamB.name}`
+                : 'Empate en posesión';
+            
+            const teamAEfficiencyPerMin = teamA.attackTime > 0 ? (teamA.stats.goles / (teamA.attackTime / 60)).toFixed(2) : '0.00';
+            const teamBEfficiencyPerMin = teamB.attackTime > 0 ? (teamB.stats.goles / (teamB.attackTime / 60)).toFixed(2) : '0.00';
+            
+            let teamAAttackClass = '', teamBAttackClass = '', teamAEffClass = '', teamBEffClass = '';
+            
+            if (parseFloat(teamAAttackPercent) > parseFloat(teamBAttackPercent)) {
+                teamAAttackClass = 'better-value'; teamBAttackClass = 'worse-value';
+            } else if (parseFloat(teamBAttackPercent) > parseFloat(teamAAttackPercent)) {
+                teamBAttackClass = 'better-value'; teamAAttackClass = 'worse-value';
+            }
+            
+            if (parseFloat(teamAEfficiencyPerMin) > parseFloat(teamBEfficiencyPerMin)) {
+                teamAEffClass = 'better-value'; teamBEffClass = 'worse-value';
+            } else if (parseFloat(teamBEfficiencyPerMin) > parseFloat(teamAEfficiencyPerMin)) {
+                teamBEffClass = 'better-value'; teamAEffClass = 'worse-value';
+            }
+            
+            return `
+                <div class="report-section">
+                    <div class="section-title">⏱️ ANÁLISIS DE POSESIÓN Y TIEMPOS (CORREGIDO)</div>
+                    
+                    <div style="background: #fff3cd; border: 2px solid #ffc107; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+                        <div style="font-size: 13px; font-weight: bold; color: #856404; margin-bottom: 8px;">
+                            ℹ️ Metodología de Corrección
+                        </div>
+                        <div style="font-size: 11px; color: #856404; line-height: 1.6;">
+                            Los tiempos de ataque han sido corregidos considerando el retraso medio (μ) y la desviación típica (σ) de cada tipo de evento. 
+                            La fórmula aplicada es: <strong>Tiempo corregido = (t_fin - t_ini) - (μ_fin - μ_ini)</strong>. 
+                            La incertidumbre total se calcula como: <strong>σ_total = √(Σσ²)</strong>.
+                        </div>
+                    </div>
+                    
+                    <div class="subsection-title">Comparativa de Tiempos de Ataque y Defensa</div>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>${teamA.name}</th>
+                                <th>MÉTRICA</th>
+                                <th>${teamB.name}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="${teamAAttackClass}">${formatTime(Math.floor(teamA.attackTime))}</td>
+                                <td><strong>Tiempo de Ataque (Corregido)</strong></td>
+                                <td class="${teamBAttackClass}">${formatTime(Math.floor(teamB.attackTime))}</td>
+                            </tr>
+                            <tr>
+                                <td>±${teamAStdDev.toFixed(1)}s</td>
+                                <td>Desviación Estándar (σ)</td>
+                                <td>±${teamBStdDev.toFixed(1)}s</td>
+                            </tr>
+                            <tr>
+                                <td>${formatTime(Math.floor(teamA.attackTimeRaw))}</td>
+                                <td>Tiempo de Ataque (Sin Corregir)</td>
+                                <td>${formatTime(Math.floor(teamB.attackTimeRaw))}</td>
+                            </tr>
+                            <tr>
+                                <td class="${teamAAttackClass}">${teamAAttackPercent}%</td>
+                                <td>% Tiempo de Ataque</td>
+                                <td class="${teamBAttackClass}">${teamBAttackPercent}%</td>
+                            </tr>
+                            <tr>
+                                <td>${formatTime(Math.floor(teamADefenseTime))}</td>
+                                <td><strong>Tiempo de Defensa</strong></td>
+                                <td>${formatTime(Math.floor(teamBDefenseTime))}</td>
+                            </tr>
+                            <tr>
+                                <td>${teamADefensePercent}%</td>
+                                <td>% Tiempo de Defensa</td>
+                                <td>${teamBDefensePercent}%</td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" style="background: #e3f2fd; text-align: center; font-weight: bold; color: #1565c0;">
+                                    Diferencia de Posesión: ${possessionDiffText}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="subsection-title">Eficacia por Tiempo de Ataque</div>
+                    <table class="team-analysis-table">
+                        <thead>
+                            <tr>
+                                <th>Equipo</th>
+                                <th>Goles</th>
+                                <th>Tiempo Ataque</th>
+                                <th>Goles/Minuto</th>
+                                <th>Lanzamientos/Minuto</th>
+                                <th>Eficacia/Minuto</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>${teamA.name}</td>
+                                <td>${teamA.stats.goles}</td>
+                                <td>${formatTime(Math.floor(teamA.attackTime))}</td>
+                                <td class="${teamAEffClass}">${teamAEfficiencyPerMin}</td>
+                                <td>${teamA.attackTime > 0 ? (teamA.stats.lanzamientos / (teamA.attackTime / 60)).toFixed(2) : '0.00'}</td>
+                                <td>${teamA.attackTime > 0 && teamA.stats.lanzamientos > 0 ? ((teamA.stats.goles / teamA.stats.lanzamientos) * 100).toFixed(1) : '0.0'}%</td>
+                            </tr>
+                            <tr>
+                                <td>${teamB.name}</td>
+                                <td>${teamB.stats.goles}</td>
+                                <td>${formatTime(Math.floor(teamB.attackTime))}</td>
+                                <td class="${teamBEffClass}">${teamBEfficiencyPerMin}</td>
+                                <td>${teamB.attackTime > 0 ? (teamB.stats.lanzamientos / (teamB.attackTime / 60)).toFixed(2) : '0.00'}</td>
+                                <td>${teamB.attackTime > 0 && teamB.stats.lanzamientos > 0 ? ((teamB.stats.goles / teamB.stats.lanzamientos) * 100).toFixed(1) : '0.0'}%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="subsection-title">📊 Interpretación de Resultados</div>
+                    <div style="background: #f8f9fa; border-radius: 8px; padding: 15px;">
+                        <ul style="font-size: 12px; line-height: 1.8; color: #495057; margin-left: 20px;">
+                            <li><strong>Tiempo de Ataque Corregido:</strong> Tiempo real estimado que cada equipo tuvo el balón en ataque, descontando los retrasos típicos del registro.</li>
+                            <li><strong>Desviación Estándar (±σ):</strong> Margen de incertidumbre en el cálculo. Un valor menor indica mayor precisión.</li>
+                            <li><strong>Tiempo de Defensa:</strong> Tiempo total del partido menos el tiempo de ataque del equipo.</li>
+                            <li><strong>Goles/Minuto:</strong> Métrica de eficacia ofensiva. Indica cuántos goles marca un equipo por cada minuto que tiene el balón.</li>
+                            <li><strong>Diferencia de Posesión:</strong> Indica qué equipo tuvo más tiempo de ataque y por cuánto margen.</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
+        // === FIN FUNCIONES NUEVAS ===
+
+        // NUEVAS FUNCIONES PARA EL SISTEMA DE TICKER
+        function generateTickerStats() {
+            const teamA = gameData.teamA;
+            const teamB = gameData.teamB;
+            
+            const stats = [];
+            
+            // 1. Eficacia general
+            const eficaciaA = teamA.stats.lanzamientos > 0 ? (teamA.stats.goles / teamA.stats.lanzamientos * 100).toFixed(1) : '0.0';
+            const eficaciaB = teamB.stats.lanzamientos > 0 ? (teamB.stats.goles / teamB.stats.lanzamientos * 100).toFixed(1) : '0.0';
+            
+            if (teamA.stats.lanzamientos > 0 || teamB.stats.lanzamientos > 0) {
+                stats.push({
+                    text: `📊 EFICACIA: <span class="stat-highlight">${teamA.name} ${eficaciaA}%</span> vs <span class="stat-highlight">${teamB.name} ${eficaciaB}%</span>`,
+                    importance: 5
+                });
+            }
+
+            // 2. Diferencia de goles y tendencia
+            const scoreDiff = teamA.score - teamB.score;
+            let diffText = '';
+            let diffClass = 'stat-value-neutral';
+            
+            if (scoreDiff > 0) {
+                diffText = `⚽ ${teamA.name} lidera por ${scoreDiff} gol${scoreDiff > 1 ? 'es' : ''}`;
+                diffClass = 'stat-value-positive';
+            } else if (scoreDiff < 0) {
+                diffText = `⚽ ${teamB.name} lidera por ${Math.abs(scoreDiff)} gol${Math.abs(scoreDiff) > 1 ? 'es' : ''}`;
+                diffClass = 'stat-value-positive';
+            } else {
+                diffText = '⚖️ PARTIDO EMPATADO';
+            }
+            
+            stats.push({
+                text: `<span class="${diffClass}">${diffText}</span>`,
+                importance: 5
+            });
+
+            // 3. Estadísticas de porteros activos
+            if (teamA.currentGoalkeeper && teamB.currentGoalkeeper) {
+                const gkA = teamA.goalkeepers[teamA.currentGoalkeeper];
+                const gkB = teamB.goalkeepers[teamB.currentGoalkeeper];
+                
+                const savePercentageA = gkA.shots_faced > 0 ? ((gkA.saves / gkA.shots_faced) * 100).toFixed(1) : '0.0';
+                const savePercentageB = gkB.shots_faced > 0 ? ((gkB.saves / gkB.shots_faced) * 100).toFixed(1) : '0.0';
+                
+                if (gkA.shots_faced > 0 || gkB.shots_faced > 0) {
+                    stats.push({
+                        text: `🥅 PORTEROS: <span class="stat-highlight">${gkA.name} ${savePercentageA}%</span> vs <span class="stat-highlight">${gkB.name} ${savePercentageB}%</span>`,
+                        importance: 4
+                    });
+                }
+            }
+
+            // 4. Superioridades
+            const supA = teamA.stats.goles_superioridad;
+            const supB = teamB.stats.goles_superioridad;
+            
+            if (supA > 0 || supB > 0) {
+                stats.push({
+                    text: `⚡ SUPERIORIDADES: <span class="stat-highlight">${teamA.name} ${supA}</span> vs <span class="stat-highlight">${teamB.name} ${supB}</span>`,
+                    importance: 4
+                });
+            }
+
+            // 5. Contraataques
+            const contraA = teamA.stats.contraataques;
+            const contraB = teamB.stats.contraataques;
+            
+            if (contraA > 0 || contraB > 0) {
+                stats.push({
+                    text: `🏃 CONTRAATAQUES: <span class="stat-highlight">${teamA.name} ${contraA}</span> vs <span class="stat-highlight">${teamB.name} ${contraB}</span>`,
+                    importance: 3
+                });
+            }
+
+            // 6. Exclusiones
+            const exclA = teamA.stats.exclusiones;
+            const exclB = teamB.stats.exclusiones;
+            
+            if (exclA > 0 || exclB > 0) {
+                let exclClass = 'stat-value-negative';
+                if (exclA > exclB) exclClass = 'stat-value-negative';
+                else if (exclB > exclA) exclClass = 'stat-value-negative';
+                
+                stats.push({
+                    text: `✌️ EXCLUSIONES: <span class="stat-highlight ${exclClass}">${teamA.name} ${exclA}</span> vs <span class="stat-highlight ${exclClass}">${teamB.name} ${exclB}</span>`,
+                    importance: 4
+                });
+            }
+
+            // 7. Pérdidas
+            const perdA = teamA.stats.perdidas;
+            const perdB = teamB.stats.perdidas;
+            
+            if (perdA > 0 || perdB > 0) {
+                stats.push({
+                    text: `📉 PÉRDIDAS: <span class="stat-highlight">${teamA.name} ${perdA}</span> vs <span class="stat-highlight">${teamB.name} ${perdB}</span>`,
+                    importance: 3
+                });
+            }
+
+            // 8. Lanzamientos de 7 metros
+            const lanz7mA = teamA.stats.lanzamientos_7m;
+            const goles7mA = teamA.stats.goles_7m;
+            const lanz7mB = teamB.stats.lanzamientos_7m;
+            const goles7mB = teamB.stats.goles_7m;
+            
+            if (lanz7mA > 0 || lanz7mB > 0) {
+                const eficacia7mA = lanz7mA > 0 ? (goles7mA / lanz7mA * 100).toFixed(0) : '0';
+                const eficacia7mB = lanz7mB > 0 ? (goles7mB / lanz7mB * 100).toFixed(0) : '0';
+                
+                stats.push({
+                    text: `🎯 7 METROS: <span class="stat-highlight">${teamA.name} ${goles7mA}/${lanz7mA} (${eficacia7mA}%)</span> vs <span class="stat-highlight">${teamB.name} ${goles7mB}/${lanz7mB} (${eficacia7mB}%)</span>`,
+                    importance: 4
+                });
+            }
+
+            // 9. Time outs utilizados
+            const toA = teamA.stats.time_outs;
+            const toB = teamB.stats.time_outs;
+            
+            if (toA > 0 || toB > 0) {
+                stats.push({
+                    text: `⏸️ TIME OUTS: <span class="stat-highlight">${teamA.name} ${toA}</span> vs <span class="stat-highlight">${teamB.name} ${toB}</span>`,
+                    importance: 2
+                });
+            }
+
+            // 10. Tendencia reciente (últimos 5 eventos)
+            if (gameData.events.length >= 3) {
+                const recentEvents = gameData.events.slice(-5);
+                const recentGoalsA = recentEvents.filter(e => e.team === 'A' && e.actions[e.team] && e.actions[e.team].includes('gol')).length;
+                const recentGoalsB = recentEvents.filter(e => e.team === 'B' && e.actions[e.team] && e.actions[e.team].includes('gol')).length;
+                
+                if (recentGoalsA > 0 || recentGoalsB > 0) {
+                    let trendText = '';
+                    if (recentGoalsA > recentGoalsB) {
+                        trendText = `📈 TENDENCIA: <span class="stat-value-positive">${teamA.name} domina (${recentGoalsA} goles en últimas 5 acciones)</span>`;
+                    } else if (recentGoalsB > recentGoalsA) {
+                        trendText = `📈 TENDENCIA: <span class="stat-value-positive">${teamB.name} domina (${recentGoalsB} goles en últimas 5 acciones)</span>`;
+                    } else {
+                        trendText = `📊 TENDENCIA: <span class="stat-value-neutral">Equilibrio reciente</span>`;
+                    }
+                    
+                    stats.push({
+                        text: trendText,
+                        importance: 3
+                    });
+                }
+            }
+
+            // Ordenar por importancia y tomar los 5 más importantes
+            return stats.sort((a, b) => b.importance - a.importance).slice(0, 5);
+        }
+
+        function updateTicker() {
+            if (tickerStats.length === 0) {
+                tickerStats = [{
+                    text: 'Esperando datos del partido...',
+                    importance: 1
+                }];
+            }
+
+            const currentItem = document.getElementById(`tickerItem${currentTickerIndex}`);
+            const nextIndex = (currentTickerIndex + 1) % 5;
+            const nextItem = document.getElementById(`tickerItem${nextIndex}`);
+
+            // Configurar el siguiente item
+            if (tickerStats.length > nextIndex) {
+                nextItem.innerHTML = tickerStats[nextIndex].text;
+            } else if (tickerStats.length > 0) {
+                const randomIndex = Math.floor(Math.random() * tickerStats.length);
+                nextItem.innerHTML = tickerStats[randomIndex].text;
+            }
+
+            // Animar transición
+            currentItem.classList.add('exit');
+            
+            setTimeout(() => {
+                currentItem.classList.remove('active', 'exit');
+                nextItem.classList.add('active');
+                currentTickerIndex = nextIndex;
+            }, 250);
+        }
+
+        function startTicker() {
+            if (tickerInterval) {
+                clearInterval(tickerInterval);
+            }
+            
+            // Actualizar estadísticas del ticker
+            tickerStats = generateTickerStats();
+            
+            // Inicializar el primer elemento
+            if (tickerStats.length > 0) {
+                document.getElementById('tickerItem0').innerHTML = tickerStats[0].text;
+            }
+            
+            // Iniciar rotación cada 4 segundos
+            tickerInterval = setInterval(updateTicker, 4000);
+        }
+
+        function updateTickerStats() {
+            // Regenerar las estadísticas
+            tickerStats = generateTickerStats();
+            
+            // Si no hay ticker corriendo, iniciarlo
+            if (!tickerInterval) {
+                startTicker();
+            }
+        }
+
+        function selectGoalkeeper(button) {
+            const team = button.getAttribute('data-team');
+            const goalkeeper = button.getAttribute('data-goalkeeper');
+            
+            document.querySelectorAll(`[data-team="${team}"].goalkeeper-btn-horizontal`).forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            button.classList.add('active');
+            gameData[`team${team}`].currentGoalkeeper = goalkeeper;
+            showGoalkeeperConfirmation(team, goalkeeper);
+            
+            // Actualizar ticker cuando cambia el portero
+            updateTickerStats();
+        }
+
+        function showGoalkeeperConfirmation(team, goalkeeper) {
+            const teamName = gameData[`team${team}`].name;
+            const goalkeeperName = gameData[`team${team}`].goalkeepers[goalkeeper].name;
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #00BCD4;
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                font-weight: bold;
+                z-index: 1001;
+                animation: slideIn 0.3s ease;
+            `;
+            notification.textContent = `🥅 ${teamName}: ${goalkeeperName} en campo`;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function updateTimerDisplay() {
+            document.getElementById('timerDisplay').textContent = formatTime(gameTimer.seconds);
+        }
+
+        function updateTimerStatus() {
+            const statusElement = document.getElementById('timerStatus');
+            if (gameTimer.isRunning) {
+                statusElement.textContent = 'Cronómetro en marcha';
+                statusElement.style.color = '#27ae60';
+            } else {
+                statusElement.textContent = 'Cronómetro detenido';
+                statusElement.style.color = '#e74c3c';
+            }
+        }
+
+        function startTimer() {
+            if (!gameTimer.isRunning) {
+                gameTimer.isRunning = true;
+                gameTimer.intervalId = setInterval(() => {
+                    gameTimer.seconds++;
+                    updateTimerDisplay();
+                }, 1000);
+                updateTimerStatus();
+            }
+        }
+
+        function pauseTimer() {
+            if (gameTimer.isRunning) {
+                gameTimer.isRunning = false;
+                clearInterval(gameTimer.intervalId);
+                updateTimerStatus();
+            }
+        }
+
+        function resetTimer() {
+            gameTimer.isRunning = false;
+            clearInterval(gameTimer.intervalId);
+            gameTimer.seconds = 0;
+            updateTimerDisplay();
+            updateTimerStatus();
+        }
+
+        function adjustTimer(seconds) {
+            gameTimer.seconds += seconds;
+            if (gameTimer.seconds < 0) gameTimer.seconds = 0;
+            updateTimerDisplay();
+        }
+
+        function getCurrentGameTime() {
+            return gameTimer.seconds;
+        }
+
+        function initializeHandballApp() {
+            updateStatsDisplay();
+            setupHandballEventListeners();
+            updateTimerDisplay();
+            updateTimerStatus();
+            updateUndoButton();
+            
+            document.getElementById('teamAGoalkeeperDisplay').textContent = gameData.teamA.name;
+            document.getElementById('teamBGoalkeeperDisplay').textContent = gameData.teamB.name;
+            
+            document.getElementById('teamAGoalkeeper1Name').value = gameData.teamA.goalkeepers[1].name;
+            document.getElementById('teamAGoalkeeper2Name').value = gameData.teamA.goalkeepers[2].name;
+            document.getElementById('teamBGoalkeeper1Name').value = gameData.teamB.goalkeepers[1].name;
+            document.getElementById('teamBGoalkeeper2Name').value = gameData.teamB.goalkeepers[2].name;
+            
+            // Inicializar el ticker
+            startTicker();
+        }
+
+        function setupHandballEventListeners() {
+            document.querySelectorAll('.action-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    selectAction(this);
+                });
+            });
+
+            document.querySelectorAll('.position-marker').forEach(marker => {
+                marker.addEventListener('click', function() {
+                    selectPosition(this);
+                });
+            });
+
+            document.getElementById('teamAName').addEventListener('input', function() {
+                gameData.teamA.name = this.value || 'EQUIPO A';
+                document.getElementById('teamADisplay').textContent = gameData.teamA.name;
+                document.getElementById('teamAGoalkeeperDisplay').textContent = gameData.teamA.name;
+                updateTickerStats();
+            });
+
+            document.getElementById('teamBName').addEventListener('input', function() {
+                gameData.teamB.name = this.value || 'EQUIPO B';
+                document.getElementById('teamBDisplay').textContent = gameData.teamB.name;
+                document.getElementById('teamBGoalkeeperDisplay').textContent = gameData.teamB.name;
+                updateTickerStats();
+            });
+
+            document.getElementById('teamAGoalkeeper1Name').addEventListener('input', function() {
+                gameData.teamA.goalkeepers[1].name = this.value || 'Portero 1';
+                updateTickerStats();
+            });
+
+            document.getElementById('teamAGoalkeeper2Name').addEventListener('input', function() {
+                gameData.teamA.goalkeepers[2].name = this.value || 'Portero 2';
+                updateTickerStats();
+            });
+
+            document.getElementById('teamBGoalkeeper1Name').addEventListener('input', function() {
+                gameData.teamB.goalkeepers[1].name = this.value || 'Portero 1';
+                updateTickerStats();
+            });
+
+            document.getElementById('teamBGoalkeeper2Name').addEventListener('input', function() {
+                gameData.teamB.goalkeepers[2].name = this.value || 'Portero 2';
+                updateTickerStats();
+            });
+        }
+
+        function selectAction(button) {
+            const team = button.getAttribute('data-team');
+            const action = button.getAttribute('data-action');
+            
+            button.classList.toggle('active');
+            
+            if (!currentEvent.actions[team]) {
+                currentEvent.actions[team] = [];
+            }
+            
+            if (button.classList.contains('active')) {
+                if (!currentEvent.actions[team].includes(action)) {
+                    currentEvent.actions[team].push(action);
+                }
+                currentEvent.team = team;
+            } else {
+                const index = currentEvent.actions[team].indexOf(action);
+                if (index > -1) {
+                    currentEvent.actions[team].splice(index, 1);
+                }
+            }
+        }
+
+        function selectPosition(marker) {
+            const team = marker.getAttribute('data-team');
+            const position = marker.getAttribute('data-position');
+            
+            document.querySelectorAll(`[data-team="${team}"].position-marker`).forEach(m => {
+                m.classList.remove('active');
+            });
+            
+            marker.classList.add('active');
+            currentEvent.position = position;
+            currentEvent.team = team;
+        }
+
+        function registerEvent() {
+            if (!currentEvent.team) {
+                alert('Selecciona al menos una acción para registrar el evento');
+                return;
+            }
+
+            const event = {
+                team: currentEvent.team,
+                actions: JSON.parse(JSON.stringify(currentEvent.actions)),
+                position: currentEvent.position,
+                timestamp: new Date(),
+                gameTime: getCurrentGameTime()
+            };
+
+            gameData.events.push(event);
+            processEventStats(event);
+            clearCurrentEvent();
+            updateStatsDisplay();
+            updateScoreboard();
+            showEventConfirmation();
+            updateUndoButton();
+            updateTickerStats();
+        }
+
+        function undoLastEvent() {
+            if (gameData.events.length === 0) {
+                alert('No hay eventos para deshacer');
+                return;
+            }
+
+            const lastEvent = gameData.events[gameData.events.length - 1];
+            revertEventStats(lastEvent);
+            gameData.events.pop();
+            
+            if (lastEvent.actions[lastEvent.team] && lastEvent.actions[lastEvent.team].includes('gol')) {
+                const goalIndex = gameData.goals.findIndex(goal => 
+                    goal.team === lastEvent.team && 
+                    goal.gameTime === lastEvent.gameTime
+                );
+                if (goalIndex !== -1) {
+                    gameData.goals.splice(goalIndex, 1);
+                }
+            }
+
+            if (lastEvent.actions[lastEvent.team] && lastEvent.actions[lastEvent.team].includes('time_out')) {
+                const timeoutIndex = gameData.timeouts.findIndex(timeout => 
+                    timeout.team === lastEvent.team && 
+                    timeout.gameTime === lastEvent.gameTime
+                );
+                if (timeoutIndex !== -1) {
+                    gameData.timeouts.splice(timeoutIndex, 1);
+                }
+            }
+
+            if (lastEvent.actions[lastEvent.team] && lastEvent.actions[lastEvent.team].includes('exclusion')) {
+                const exclusionIndex = gameData.exclusions.findIndex(exclusion => 
+                    exclusion.team === lastEvent.team && 
+                    exclusion.gameTime === lastEvent.gameTime
+                );
+                if (exclusionIndex !== -1) {
+                    gameData.exclusions.splice(exclusionIndex, 1);
+                }
+            }
+            
+            updateStatsDisplay();
+            updateScoreboard();
+            updateUndoButton();
+            showUndoConfirmation();
+            updateTickerStats();
+        }
+
+        function revertEventStats(event) {
+            const team = gameData[`team${event.team}`];
+            const actions = event.actions[event.team] || [];
+            
+            let isGoal = actions.includes('gol');
+            let isStop = actions.includes('parada');
+            let isMiss = actions.includes('poste_fuera');
+            let isShot = isGoal || isStop || isMiss;
+
+            if (isShot) {
+                const oppositeTeam = event.team === 'A' ? 'teamB' : 'teamA';
+                const oppositeTeamData = gameData[oppositeTeam];
+                
+                if (oppositeTeamData.currentGoalkeeper) {
+                    const goalkeeper = oppositeTeamData.goalkeepers[oppositeTeamData.currentGoalkeeper];
+                    goalkeeper.shots_faced--;
+                    
+                    if (isGoal) {
+                        goalkeeper.goals_conceded--;
+                    } else if (isStop) {
+                        goalkeeper.saves--;
+                    }
+                }
+            }
+
+            if (isShot) {
+                const attackTypes = ['contraataque', 'posicional', 'posicional_7x6', 'campo_contrario'];
+                attackTypes.forEach(attackType => {
+                    if (actions.includes(attackType) && team.stats.ataques[attackType]) {
+                        team.stats.ataques[attackType].lanzamientos--;
+                        if (isGoal) team.stats.ataques[attackType].goles--;
+                        if (isStop) team.stats.ataques[attackType].paradas--;
+                        if (isMiss) team.stats.ataques[attackType].poste_fuera--;
+                    }
+                });
+
+                const zones = ['6m', '9m', '7m'];
+                zones.forEach(zone => {
+                    if (actions.includes(zone) && team.stats.zonas[zone]) {
+                        team.stats.zonas[zone].lanzamientos--;
+                        if (isGoal) team.stats.zonas[zone].goles--;
+                        if (isStop) team.stats.zonas[zone].paradas--;
+                        if (isMiss) team.stats.zonas[zone].poste_fuera--;
+                    }
+                });
+
+                const shotTypes = ['salto', 'apoyo', 'penetración', 'finta', 'habilidad', 'fly'];
+                shotTypes.forEach(shotType => {
+                    if (actions.includes(shotType) && team.stats.acciones[shotType]) {
+                        team.stats.acciones[shotType].lanzamientos--;
+                        if (isGoal) team.stats.acciones[shotType].goles--;
+                        if (isStop) team.stats.acciones[shotType].paradas--;
+                        if (isMiss) team.stats.acciones[shotType].poste_fuera--;
+                    }
+                });
+
+                const situations = ['superioridad', 'igualdad', 'inferioridad', '2x2'];
+                situations.forEach(situation => {
+                    if (actions.includes(situation) && team.stats.situaciones[situation]) {
+                        team.stats.situaciones[situation].lanzamientos--;
+                        if (isGoal) team.stats.situaciones[situation].goles--;
+                        if (isStop) team.stats.situaciones[situation].paradas--;
+                        if (isMiss) team.stats.situaciones[situation].poste_fuera--;
+                    }
+                });
+
+                const defenseType = actions.find(action => 
+                    ['defensa_6_0', 'defensa_5_1', 'defensa_otros'].includes(action)
+                );
+                
+                if (defenseType && team.stats.defensas[defenseType]) {
+                    team.stats.defensas[defenseType].lanzamientos--;
+                    if (isGoal) team.stats.defensas[defenseType].goles--;
+                    if (isStop) team.stats.defensas[defenseType].paradas--;
+                    if (isMiss) team.stats.defensas[defenseType].poste_fuera--;
+                }
+
+                if (event.position && team.stats.posiciones[event.position]) {
+                    team.stats.posiciones[event.position].lanzamientos--;
+                    if (isGoal) team.stats.posiciones[event.position].goles--;
+                    if (isStop) team.stats.posiciones[event.position].paradas--;
+                    if (isMiss) team.stats.posiciones[event.position].poste_fuera--;
+                }
+            }
+
+            actions.forEach(action => {
+                switch(action) {
+                    case 'gol':
+                        team.stats.goles--;
+                        team.score--;
+                        team.stats.lanzamientos--;
+                        if (actions.includes('7m')) {
+                            team.stats.goles_7m--;
+                            team.stats.lanzamientos_7m--;
+                        }
+                        if (actions.includes('2x2')) {
+                            team.stats.goles_2x2--;
+                            team.stats.lanzamientos_2x2--;
+                        }
+                        if (actions.includes('contraataque')) team.stats.contraataques--;
+                        if (actions.includes('superioridad')) team.stats.goles_superioridad--;
+                        if (actions.includes('6m')) team.stats.goles_6m--;
+                        if (actions.includes('9m')) team.stats.goles_9m--;
+                        break;
+                    case 'parada':
+                        team.stats.lanzamientos--;
+                        if (actions.includes('7m')) team.stats.lanzamientos_7m--;
+                        if (actions.includes('2x2')) team.stats.lanzamientos_2x2--;
+                        const oppositeTeam = event.team === 'A' ? 'teamB' : 'teamA';
+                        gameData[oppositeTeam].stats.paradas--;
+                        break;
+                    case 'poste_fuera':
+                        team.stats.lanzamientos--;
+                        team.stats.poste_fuera--;
+                        if (actions.includes('7m')) team.stats.lanzamientos_7m--;
+                        if (actions.includes('2x2')) team.stats.lanzamientos_2x2--;
+                        break;
+                    case 'perdida':
+                        team.stats.perdidas--;
+                        break;
+                    case 'error_tecnico':
+                        team.stats.errores_tecnicos--;
+                        break;
+                    case 'exclusion':
+                        team.stats.exclusiones--;
+                        break;
+                    case 'time_out':
+                        team.stats.time_outs--;
+                        break;
+                    case 'golpe_franco':
+                        team.stats.golpes_franco--;
+                        team.stats.gf_recibidos--;
+                        if (event.position && team.stats.golpes_franco_por_posicion) {
+                            team.stats.golpes_franco_por_posicion[event.position]--;
+                        }
+                        break;
+                    case 'rechace':
+                        team.stats.rechaces--;
+                        break;
+                }
+            });
+
+            if (!actions.includes('rechace') && (isShot || actions.includes('perdida') || actions.includes('error_tecnico'))) {
+                team.stats.posesiones--;
+            }
+
+            Object.keys(team.stats).forEach(key => {
+                if (typeof team.stats[key] === 'number' && team.stats[key] < 0) {
+                    team.stats[key] = 0;
+                }
+            });
+
+            // NUEVO: Recalcular tiempos de ataque
+            recalculateAttackTimes();
+        }
+
+        function updateUndoButton() {
+            const undoBtn = document.getElementById('undoBtn');
+            if (gameData.events.length > 0) {
+                undoBtn.disabled = false;
+                undoBtn.textContent = `↶ Deshacer Último (${gameData.events.length})`;
+            } else {
+                undoBtn.disabled = true;
+                undoBtn.textContent = '↶ Deshacer Último';
+            }
+        }
+
+        function showUndoConfirmation() {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #f44336;
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                font-weight: bold;
+                z-index: 1001;
+                animation: slideIn 0.3s ease;
+            `;
+            notification.textContent = '↶ Último evento deshecho correctamente';
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        function processEventStats(event) {
+            const team = gameData[`team${event.team}`];
+            const actions = event.actions[event.team] || [];
+            
+            let isGoal = actions.includes('gol');
+            let isStop = actions.includes('parada');
+            let isMiss = actions.includes('poste_fuera');
+            let isShot = isGoal || isStop || isMiss;
+
+            // NUEVO: Actualizar tiempos de ataque
+            const shouldChangePossession = isGoal || (isStop && !actions.includes('rechace')) || isMiss || actions.includes('perdida') || actions.includes('error_tecnico');
+            updateAttackTime(event.gameTime, shouldChangePossession, event.team, actions);
+
+            if (actions.includes('time_out')) {
+                captureTimeoutContext(event);
+            }
+
+            if (actions.includes('exclusion')) {
+                captureExclusionContext(event);
+            }
+
+            if (isGoal) {
+                gameData.goals.push({
+                    team: event.team,
+                    teamName: team.name,
+                    gameTime: event.gameTime,
+                    timestamp: event.timestamp,
+                    position: event.position,
+                    actions: actions
+                });
+            }
+
+            if (isShot) {
+                const oppositeTeam = event.team === 'A' ? 'teamB' : 'teamA';
+                const oppositeTeamData = gameData[oppositeTeam];
+                
+                if (oppositeTeamData.currentGoalkeeper) {
+                    const goalkeeper = oppositeTeamData.goalkeepers[oppositeTeamData.currentGoalkeeper];
+                    goalkeeper.shots_faced++;
+                    
+                    if (isGoal) {
+                        goalkeeper.goals_conceded++;
+                    } else if (isStop) {
+                        goalkeeper.saves++;
+                    }
+                }
+            }
+
+            if (isShot) {
+                const attackTypes = ['contraataque', 'posicional', 'posicional_7x6', 'campo_contrario'];
+                attackTypes.forEach(attackType => {
+                    if (actions.includes(attackType) && team.stats.ataques[attackType]) {
+                        team.stats.ataques[attackType].lanzamientos++;
+                        if (isGoal) team.stats.ataques[attackType].goles++;
+                        if (isStop) team.stats.ataques[attackType].paradas++;
+                        if (isMiss) team.stats.ataques[attackType].poste_fuera++;
+                    }
+                });
+
+                const zones = ['6m', '9m', '7m'];
+                zones.forEach(zone => {
+                    if (actions.includes(zone) && team.stats.zonas[zone]) {
+                        team.stats.zonas[zone].lanzamientos++;
+                        if (isGoal) team.stats.zonas[zone].goles++;
+                        if (isStop) team.stats.zonas[zone].paradas++;
+                        if (isMiss) team.stats.zonas[zone].poste_fuera++;
+                    }
+                });
+
+                const shotTypes = ['salto', 'apoyo', 'penetración', 'finta', 'habilidad', 'fly'];
+                shotTypes.forEach(shotType => {
+                    if (actions.includes(shotType) && team.stats.acciones[shotType]) {
+                        team.stats.acciones[shotType].lanzamientos++;
+                        if (isGoal) team.stats.acciones[shotType].goles++;
+                        if (isStop) team.stats.acciones[shotType].paradas++;
+                        if (isMiss) team.stats.acciones[shotType].poste_fuera++;
+                    }
+                });
+
+                const situations = ['superioridad', 'igualdad', 'inferioridad', '2x2'];
+                situations.forEach(situation => {
+                    if (actions.includes(situation) && team.stats.situaciones[situation]) {
+                        team.stats.situaciones[situation].lanzamientos++;
+                        if (isGoal) team.stats.situaciones[situation].goles++;
+                        if (isStop) team.stats.situaciones[situation].paradas++;
+                        if (isMiss) team.stats.situaciones[situation].poste_fuera++;
+                    }
+                });
+
+                const defenseType = actions.find(action => 
+                    ['defensa_6_0', 'defensa_5_1', 'defensa_otros'].includes(action)
+                );
+                
+                if (defenseType && team.stats.defensas[defenseType]) {
+                    team.stats.defensas[defenseType].lanzamientos++;
+                    if (isGoal) team.stats.defensas[defenseType].goles++;
+                    if (isStop) team.stats.defensas[defenseType].paradas++;
+                    if (isMiss) team.stats.defensas[defenseType].poste_fuera++;
+                }
+
+                if (event.position && team.stats.posiciones[event.position]) {
+                    team.stats.posiciones[event.position].lanzamientos++;
+                    if (isGoal) team.stats.posiciones[event.position].goles++;
+                    if (isStop) team.stats.posiciones[event.position].paradas++;
+                    if (isMiss) team.stats.posiciones[event.position].poste_fuera++;
+                }
+            }
+
+            actions.forEach(action => {
+                switch(action) {
+                    case 'gol':
+                        team.stats.goles++;
+                        team.score++;
+                        team.stats.lanzamientos++;
+                        if (actions.includes('7m')) {
+                            team.stats.goles_7m++;
+                            team.stats.lanzamientos_7m++;
+                        }
+                        if (actions.includes('2x2')) {
+                            team.stats.goles_2x2++;
+                            team.stats.lanzamientos_2x2++;
+                        }
+                        if (actions.includes('contraataque')) team.stats.contraataques++;
+                        if (actions.includes('superioridad')) team.stats.goles_superioridad++;
+                        if (actions.includes('6m')) team.stats.goles_6m++;
+                        if (actions.includes('9m')) team.stats.goles_9m++;
+                        break;
+                    case 'parada':
+                        team.stats.lanzamientos++;
+                        if (actions.includes('7m')) team.stats.lanzamientos_7m++;
+                        if (actions.includes('2x2')) team.stats.lanzamientos_2x2++;
+                        const oppositeTeam = event.team === 'A' ? 'teamB' : 'teamA';
+                        gameData[oppositeTeam].stats.paradas++;
+                        break;
+                    case 'poste_fuera':
+                        team.stats.lanzamientos++;
+                        team.stats.poste_fuera++;
+                        if (actions.includes('7m')) team.stats.lanzamientos_7m++;
+                        if (actions.includes('2x2')) team.stats.lanzamientos_2x2++;
+                        break;
+                    case 'perdida':
+                        team.stats.perdidas++;
+                        break;
+                    case 'error_tecnico':
+                        team.stats.errores_tecnicos++;
+                        break;
+                    case 'exclusion':
+                        team.stats.exclusiones++;
+                        break;
+                    case 'time_out':
+                        team.stats.time_outs++;
+                        break;
+                    case 'golpe_franco':
+                        team.stats.golpes_franco++;
+                        team.stats.gf_recibidos++;
+                        if (event.position && !team.stats.golpes_franco_por_posicion) {
+                            team.stats.golpes_franco_por_posicion = {
+                                A: 0, B: 0, C: 0, D: 0, E: 0, F: 0
+                            };
+                        }
+                        if (event.position && team.stats.golpes_franco_por_posicion) {
+                            team.stats.golpes_franco_por_posicion[event.position]++;
+                        }
+                        break;
+                    case 'rechace':
+                        team.stats.rechaces++;
+                        break;
+                }
+            });
+
+            if (!actions.includes('rechace') && (isShot || actions.includes('perdida') || actions.includes('error_tecnico'))) {
+                team.stats.posesiones++;
+            }
+        }
+
+        function captureTimeoutContext(event) {
+            const currentEventIndex = gameData.events.length - 1;
+            
+            const timeoutData = {
+                team: event.team,
+                teamName: gameData[`team${event.team}`].name,
+                gameTime: event.gameTime,
+                timestamp: event.timestamp,
+                scoreBefore: {
+                    teamA: gameData.teamA.score,
+                    teamB: gameData.teamB.score
+                },
+                eventIndex: currentEventIndex,
+                nextEvents: []
+            };
+            
+            gameData.timeouts.push(timeoutData);
+        }
+
+        function captureExclusionContext(event) {
+            const currentEventIndex = gameData.events.length - 1;
+            
+            const exclusionData = {
+                team: event.team,
+                teamName: gameData[`team${event.team}`].name,
+                excludedTeam: event.team,
+                superiorityTeam: event.team === 'A' ? 'B' : 'A',
+                gameTime: event.gameTime,
+                timestamp: event.timestamp,
+                scoreBefore: {
+                    teamA: gameData.teamA.score,
+                    teamB: gameData.teamB.score
+                },
+                eventIndex: currentEventIndex,
+                eventsNext2Min: [],
+                endTime: event.gameTime + 120
+            };
+            
+            gameData.exclusions.push(exclusionData);
+        }
+
+        function updateExclusionNextEvents() {
+            gameData.exclusions.forEach(exclusion => {
+                exclusion.eventsNext2Min = [];
+                exclusion.scoreAfter = {
+                    teamA: gameData.teamA.score,
+                    teamB: gameData.teamB.score
+                };
+                
+                for (let i = exclusion.eventIndex + 1; i < gameData.events.length; i++) {
+                    const event = gameData.events[i];
+                    
+                    if (event.gameTime <= exclusion.endTime && event.gameTime >= exclusion.gameTime) {
+                        exclusion.eventsNext2Min.push({
+                            team: event.team,
+                            teamName: gameData[`team${event.team}`].name,
+                            actions: event.actions[event.team] || [],
+                            gameTime: event.gameTime,
+                            position: event.position,
+                            isGoal: event.actions[event.team] && event.actions[event.team].includes('gol'),
+                            isShot: event.actions[event.team] && (
+                                event.actions[event.team].includes('gol') ||
+                                event.actions[event.team].includes('parada') ||
+                                event.actions[event.team].includes('poste_fuera')
+                            )
+                        });
+                    }
+                }
+                
+                exclusion.stats = calculateExclusionStats(exclusion);
+            });
+        }
+
+        function calculateExclusionStats(exclusion) {
+            let stats = {
+                superiorityTeam: {
+                    goals: 0,
+                    shots: 0,
+                    efficiency: 0
+                },
+                excludedTeam: {
+                    goals: 0,
+                    shots: 0,
+                    efficiency: 0
+                },
+                totalEvents: exclusion.eventsNext2Min.length,
+                duration: Math.min(120, gameTimer.seconds - exclusion.gameTime),
+                scoreChange: {
+                    superiorityTeam: 0,
+                    excludedTeam: 0,
+                    net: 0
+                }
+            };
+            
+            exclusion.eventsNext2Min.forEach(event => {
+                if (event.team === exclusion.superiorityTeam) {
+                    if (event.isGoal) stats.superiorityTeam.goals++;
+                    if (event.isShot) stats.superiorityTeam.shots++;
+                } else if (event.team === exclusion.excludedTeam) {
+                    if (event.isGoal) stats.excludedTeam.goals++;
+                    if (event.isShot) stats.excludedTeam.shots++;
+                }
+            });
+            
+            stats.superiorityTeam.efficiency = stats.superiorityTeam.shots > 0 ? 
+                (stats.superiorityTeam.goals / stats.superiorityTeam.shots * 100).toFixed(1) : '0.0';
+            stats.excludedTeam.efficiency = stats.excludedTeam.shots > 0 ? 
+                (stats.excludedTeam.goals / stats.excludedTeam.shots * 100).toFixed(1) : '0.0';
+            
+            const scoreBefore = exclusion.scoreBefore;
+            const scoreAfter = exclusion.scoreAfter || { teamA: gameData.teamA.score, teamB: gameData.teamB.score };
+            
+            if (exclusion.superiorityTeam === 'A') {
+                stats.scoreChange.superiorityTeam = scoreAfter.teamA - scoreBefore.teamA;
+                stats.scoreChange.excludedTeam = scoreAfter.teamB - scoreBefore.teamB;
+            } else {
+                stats.scoreChange.superiorityTeam = scoreAfter.teamB - scoreBefore.teamB;
+                stats.scoreChange.excludedTeam = scoreAfter.teamA - scoreBefore.teamA;
+            }
+            
+            stats.scoreChange.net = stats.scoreChange.superiorityTeam - stats.scoreChange.excludedTeam;
+            
+            return stats;
+        }
+
+        function updateTimeoutNextEvents() {
+            gameData.timeouts.forEach(timeout => {
+                timeout.nextEvents = [];
+                
+                for (let i = timeout.eventIndex + 1; i < Math.min(timeout.eventIndex + 6, gameData.events.length); i++) {
+                    if (i < gameData.events.length) {
+                        const nextEvent = gameData.events[i];
+                        timeout.nextEvents.push({
+                            team: nextEvent.team,
+                            teamName: gameData[`team${nextEvent.team}`].name,
+                            actions: nextEvent.actions[nextEvent.team] || [],
+                            gameTime: nextEvent.gameTime,
+                            position: nextEvent.position
+                        });
+                    }
+                }
+                
+                timeout.scoreAfter = {
+                    teamA: gameData.teamA.score,
+                    teamB: gameData.teamB.score
+                };
+            });
+        }
+
+        function clearCurrentEvent() {
+            currentEvent = {
+                team: null,
+                actions: {},
+                position: null,
+                timestamp: null
+            };
+
+            document.querySelectorAll('.action-btn.active').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            document.querySelectorAll('.position-marker.active').forEach(marker => {
+                marker.classList.remove('active');
+            });
+        }
+
+        function updateScoreboard() {
+            document.getElementById('scoreA').textContent = gameData.teamA.score;
+            document.getElementById('scoreB').textContent = gameData.teamB.score;
+        }
+
+        function updateStatsDisplay() {
+            const statsContent = document.getElementById('statsContent');
+            
+            const statsConfig = [
+                { key: 'gf_recibidos', label: 'GF Recibidos', negative: true },
+                { key: 'exclusiones', label: 'Exclusiones', negative: true },
+                { key: 'paradas', label: 'Paradas', negative: false },
+                { key: 'perdidas', label: 'Pérdidas', negative: true },
+                { key: 'posesiones', label: 'Posesiones', negative: false },
+                { key: 'lanzamientos_7m', label: 'Lanzamientos 7M', negative: false },
+                { key: 'goles_superioridad', label: 'Goles Superioridad', negative: false },
+                { key: 'contraataques', label: 'Contraataques', negative: false },
+                { key: 'goles_6m', label: 'Goles 6M', negative: false },
+                { key: 'goles_9m', label: 'Goles 9M', negative: false },
+                { key: 'errores_tecnicos', label: 'Errores Técnicos', negative: true },
+                { key: 'rechaces', label: 'Rechaces', negative: false },
+                { key: 'goles_2x2', label: 'Goles 2x2', negative: false },
+                { key: 'lanzamientos_2x2', label: 'Lanzamientos 2x2', negative: false }
+            ];
+
+            statsContent.innerHTML = '';
+
+            statsConfig.forEach(stat => {
+                const row = document.createElement('div');
+                row.className = 'stat-row';
+
+                const valueA = gameData.teamA.stats[stat.key] || 0;
+                const valueB = gameData.teamB.stats[stat.key] || 0;
+
+                const classA = getStatClass(valueA, valueB, stat.negative);
+                const classB = getStatClass(valueB, valueA, stat.negative);
+
+                row.innerHTML = `
+                    <div class="stat-label">${stat.label}</div>
+                    <div class="stat-value ${classA}">${valueA}</div>
+                    <div class="stat-value ${classB}">${valueB}</div>
+                    <div class="stat-label">${stat.label}</div>
+                `;
+
+                statsContent.appendChild(row);
+            });
+
+            addEfficiencyStats();
+        }
+
+        function getStatClass(value1, value2, isNegative) {
+            if (value1 === value2) return 'neutral';
+            
+            if (isNegative) {
+                return value1 < value2 ? 'good' : 'bad';
+            } else {
+                return value1 > value2 ? 'good' : 'bad';
+            }
+        }
+
+        function addEfficiencyStats() {
+            const statsContent = document.getElementById('statsContent');
+            
+            const eficaciaA = gameData.teamA.stats.lanzamientos > 0 ? 
+                (gameData.teamA.stats.goles / gameData.teamA.stats.lanzamientos * 100).toFixed(1) : '0.0';
+            const eficaciaB = gameData.teamB.stats.lanzamientos > 0 ? 
+                (gameData.teamB.stats.goles / gameData.teamB.stats.lanzamientos * 100).toFixed(1) : '0.0';
+
+            const eficaciaRow = document.createElement('div');
+            eficaciaRow.className = 'stat-row';
+            eficaciaRow.innerHTML = `
+                <div class="stat-label">Eficacia Ataque (%)</div>
+                <div class="stat-value ${parseFloat(eficaciaA) > parseFloat(eficaciaB) ? 'good' : parseFloat(eficaciaA) < parseFloat(eficaciaB) ? 'bad' : 'neutral'}">${eficaciaA}%</div>
+                <div class="stat-value ${parseFloat(eficaciaB) > parseFloat(eficaciaA) ? 'good' : parseFloat(eficaciaB) < parseFloat(eficaciaA) ? 'bad' : 'neutral'}">${eficaciaB}%</div>
+                <div class="stat-label">Eficacia Ataque (%)</div>
+            `;
+            statsContent.appendChild(eficaciaRow);
+        }
+
+        function showEventConfirmation() {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #4CAF50;
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                font-weight: bold;
+                z-index: 1001;
+                animation: slideIn 0.3s ease;
+            `;
+            notification.textContent = '✅ Evento registrado correctamente';
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        function showReport() {
+            updateTimeoutNextEvents();
+            updateExclusionNextEvents();
+            const modal = document.getElementById('reportModal');
+            const reportContent = document.getElementById('reportContent');
+            
+            reportContent.innerHTML = generateExecutiveReport();
+            modal.style.display = 'block';
+        }
+
+        function generateExecutiveReport() {
+            const teamA = gameData.teamA;
+            const teamB = gameData.teamB;
+            
+            return `
+                <div class="report-title">
+                    INFORME EJECUTIVO DEL PARTIDO<br>
+                    ${teamA.name} ${teamA.score} - ${teamB.score} ${teamB.name}
+                    <div style="font-size: 14px; margin-top: 10px; opacity: 0.8;">
+                        Tiempo de juego: ${formatTime(gameTimer.seconds)}
+                    </div>
+                </div>
+
+                ${generateComparisonSection()}
+                ${generatePossessionAnalysisSection()}
+                ${generateTimeoutsAnalysisSection()} 
+                ${generateExclusionsAnalysisSection()}
+                ${generateGoalkeeperAnalysis()}
+                ${generateTeamAnalysis('A', teamA, 'LOCAL')}
+                ${generateTeamAnalysis('B', teamB, 'VISITANTE')}
+                ${generateTimeStatisticsSection()}
+            `;
+        }
+
+        function generateExclusionsAnalysisSection() {
+            if (gameData.exclusions.length === 0) {
+                return '';
+            }
+
+            let exclusionsHtml = `
+                <div class="report-section">
+                    <div class="section-title">✌️ ANÁLISIS DE EXCLUSIONES (2 MINUTOS)</div>
+                    <div class="subsection-title">Impacto de las Exclusiones en el Rendimiento</div>
+                    
+                    ${generateExclusionsSummaryTable()}
+                    ${generateDetailedExclusionsAnalysis()}
+                    ${generateExclusionsPerformanceComparison()}
+                </div>
+            `;
+
+            return exclusionsHtml;
+        }
+
+        function generateExclusionsSummaryTable() {
+            let summaryStats = {
+                teamA: { exclusions: 0, goalsAgainst: 0, goalsFor: 0, netImpact: 0 },
+                teamB: { exclusions: 0, goalsAgainst: 0, goalsFor: 0, netImpact: 0 }
+            };
+
+            gameData.exclusions.forEach(exclusion => {
+                const excludedTeam = exclusion.excludedTeam;
+                const superiorityTeam = exclusion.superiorityTeam;
+                
+                summaryStats[`team${excludedTeam}`].exclusions++;
+                summaryStats[`team${excludedTeam}`].goalsAgainst += exclusion.stats.scoreChange.superiorityTeam;
+                summaryStats[`team${excludedTeam}`].goalsFor += exclusion.stats.scoreChange.excludedTeam;
+                summaryStats[`team${excludedTeam}`].netImpact += exclusion.stats.scoreChange.net * -1;
+            });
+
+            return `
+                <div class="subsection-title">Resumen General de Exclusiones</div>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Equipo</th>
+                            <th>Exclusiones</th>
+                            <th>Goles Recibidos en Inferioridad</th>
+                            <th>Goles a Favor en Inferioridad</th>
+                            <th>Impacto Neto</th>
+                            <th>Promedio por Exclusión</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>${gameData.teamA.name}</td>
+                            <td>${summaryStats.teamA.exclusions}</td>
+                            <td class="${summaryStats.teamA.goalsAgainst > summaryStats.teamB.goalsAgainst ? 'worse-value' : summaryStats.teamA.goalsAgainst < summaryStats.teamB.goalsAgainst ? 'better-value' : ''}">${summaryStats.teamA.goalsAgainst}</td>
+                            <td class="${summaryStats.teamA.goalsFor > summaryStats.teamB.goalsFor ? 'better-value' : summaryStats.teamA.goalsFor < summaryStats.teamB.goalsFor ? 'worse-value' : ''}">${summaryStats.teamA.goalsFor}</td>
+                            <td class="${summaryStats.teamA.netImpact < summaryStats.teamB.netImpact ? 'better-value' : summaryStats.teamA.netImpact > summaryStats.teamB.netImpact ? 'worse-value' : ''}">${summaryStats.teamA.netImpact > 0 ? '+' : ''}${summaryStats.teamA.netImpact}</td>
+                            <td>${summaryStats.teamA.exclusions > 0 ? (summaryStats.teamA.netImpact / summaryStats.teamA.exclusions).toFixed(1) : '0.0'}</td>
+                        </tr>
+                        <tr>
+                            <td>${gameData.teamB.name}</td>
+                            <td>${summaryStats.teamB.exclusions}</td>
+                            <td class="${summaryStats.teamB.goalsAgainst > summaryStats.teamA.goalsAgainst ? 'worse-value' : summaryStats.teamB.goalsAgainst < summaryStats.teamA.goalsAgainst ? 'better-value' : ''}">${summaryStats.teamB.goalsAgainst}</td>
+                            <td class="${summaryStats.teamB.goalsFor > summaryStats.teamA.goalsFor ? 'better-value' : summaryStats.teamB.goalsFor < summaryStats.teamA.goalsFor ? 'worse-value' : ''}">${summaryStats.teamB.goalsFor}</td>
+                            <td class="${summaryStats.teamB.netImpact < summaryStats.teamA.netImpact ? 'better-value' : summaryStats.teamB.netImpact > summaryStats.teamA.netImpact ? 'worse-value' : ''}">${summaryStats.teamB.netImpact > 0 ? '+' : ''}${summaryStats.teamB.netImpact}</td>
+                            <td>${summaryStats.teamB.exclusions > 0 ? (summaryStats.teamB.netImpact / summaryStats.teamB.exclusions).toFixed(1) : '0.0'}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function generateDetailedExclusionsAnalysis() {
+            let detailsHtml = `<div class="subsection-title">Análisis Detallado por Exclusión</div>`;
+
+            gameData.exclusions.forEach((exclusion, index) => {
+                const excludedTeamName = gameData[`team${exclusion.excludedTeam}`].name;
+                const superiorityTeamName = gameData[`team${exclusion.superiorityTeam}`].name;
+                
+                let impactClass = 'timeout-impact-neutral';
+                let impactText = 'Sin impacto significativo';
+                
+                if (exclusion.stats.scoreChange.net > 0) {
+                    impactClass = 'timeout-impact-positive';
+                    impactText = `+${exclusion.stats.scoreChange.net} a favor de ${superiorityTeamName}`;
+                } else if (exclusion.stats.scoreChange.net < 0) {
+                    impactClass = 'timeout-impact-negative';
+                    impactText = `${exclusion.stats.scoreChange.net} a favor de ${excludedTeamName}`;
+                }
+
+                let eventsHtml = '';
+                if (exclusion.eventsNext2Min.length === 0) {
+                    eventsHtml = '<p style="color: #999; font-style: italic; padding: 10px;">No se registraron eventos durante esta exclusión</p>';
+                } else {
+                    exclusion.eventsNext2Min.forEach((evt, evtIndex) => {
+                        const timeFromExclusion = evt.gameTime - exclusion.gameTime;
+                        const actionsText = evt.actions.map(action => {
+                            const actionMap = {
+                                'gol': '⚽ GOL',
+                                'parada': '🧤 Parada',
+                                'poste_fuera': '❌ Poste/Fuera',
+                                'perdida': '📉 Pérdida',
+                                'error_tecnico': '⚠️ Error Técnico',
+                                'contraataque': '⚡ Contraataque',
+                                'posicional': '🔄 Posicional',
+                                '7m': '7M',
+                                '6m': '6M',
+                                '9m': '9M',
+                                'superioridad': 'Superioridad',
+                                'inferioridad': 'Inferioridad'
+                            };
+                            return actionMap[action] || action;
+                        }).join(', ');
+                        
+                        eventsHtml += `
+                            <div class="timeout-event-item">
+                                <strong>+${timeFromExclusion}s</strong> (${formatTime(evt.gameTime)}) - 
+                                ${evt.teamName}: ${actionsText}
+                                ${evt.position ? ` - Posición ${evt.position}` : ''}
+                            </div>
+                        `;
+                    });
+                }
+
+                detailsHtml += `
+                    <div class="timeout-card">
+                        <div class="timeout-header">
+                            Exclusión #${index + 1} - ${excludedTeamName} (${formatTime(exclusion.gameTime)})
+                        </div>
+                        
+                        <div class="timeout-info">
+                            <div class="timeout-info-item">
+                                <div class="timeout-info-label">Equipo Excluido</div>
+                                <div class="timeout-info-value">${excludedTeamName}</div>
+                            </div>
+                            <div class="timeout-info-item">
+                                <div class="timeout-info-label">Equipo en Superioridad</div>
+                                <div class="timeout-info-value">${superiorityTeamName}</div>
+                            </div>
+                            <div class="timeout-info-item">
+                                <div class="timeout-info-label">Marcador Inicial</div>
+                                <div class="timeout-info-value">${exclusion.scoreBefore.teamA} - ${exclusion.scoreBefore.teamB}</div>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0;">
+                            <div style="background: #e8f5e8; padding: 12px; border-radius: 6px;">
+                                <div style="font-weight: bold; color: #2e7d32; margin-bottom: 8px;">
+                                    ${superiorityTeamName} (Superioridad)
+                                </div>
+                                <div style="font-size: 12px;">
+                                    Goles: <strong>${exclusion.stats.superiorityTeam.goals}</strong><br>
+                                    Lanzamientos: <strong>${exclusion.stats.superiorityTeam.shots}</strong><br>
+                                    Eficacia: <strong>${exclusion.stats.superiorityTeam.efficiency}%</strong>
+                                </div>
+                            </div>
+                            <div style="background: #ffebee; padding: 12px; border-radius: 6px;">
+                                <div style="font-weight: bold; color: #c62828; margin-bottom: 8px;">
+                                    ${excludedTeamName} (Inferioridad)
+                                </div>
+                                <div style="font-size: 12px;">
+                                    Goles: <strong>${exclusion.stats.excludedTeam.goals}</strong><br>
+                                    Lanzamientos: <strong>${exclusion.stats.excludedTeam.shots}</strong><br>
+                                    Eficacia: <strong>${exclusion.stats.excludedTeam.efficiency}%</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="timeout-events">
+                            <div class="timeout-events-title">📋 Eventos durante la Exclusión (2 minutos)</div>
+                            ${eventsHtml}
+                        </div>
+
+                        <div class="timeout-impact">
+                            <div class="timeout-impact-item">
+                                <div class="timeout-impact-label">Marcador Final</div>
+                                <div class="timeout-impact-value">${exclusion.scoreAfter ? exclusion.scoreAfter.teamA : gameData.teamA.score} - ${exclusion.scoreAfter ? exclusion.scoreAfter.teamB : gameData.teamB.score}</div>
+                            </div>
+                            <div class="timeout-impact-item">
+                                <div class="timeout-impact-label">Impacto Neto</div>
+                                <div class="timeout-impact-value ${impactClass}">${impactText}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            return detailsHtml;
+        }
+
+        function generateExclusionsPerformanceComparison() {
+            let teamAStats = { 
+                asSuperior: { events: 0, goals: 0, shots: 0, efficiency: 0 },
+                asExcluded: { events: 0, goals: 0, shots: 0, efficiency: 0 }
+            };
+            let teamBStats = { 
+                asSuperior: { events: 0, goals: 0, shots: 0, efficiency: 0 },
+                asExcluded: { events: 0, goals: 0, shots: 0, efficiency: 0 }
+            };
+
+            gameData.exclusions.forEach(exclusion => {
+                if (exclusion.superiorityTeam === 'A') {
+                    teamAStats.asSuperior.events++;
+                    teamAStats.asSuperior.goals += exclusion.stats.superiorityTeam.goals;
+                    teamAStats.asSuperior.shots += exclusion.stats.superiorityTeam.shots;
+                    
+                    teamBStats.asExcluded.events++;
+                    teamBStats.asExcluded.goals += exclusion.stats.excludedTeam.goals;
+                    teamBStats.asExcluded.shots += exclusion.stats.excludedTeam.shots;
+                } else {
+                    teamBStats.asSuperior.events++;
+                    teamBStats.asSuperior.goals += exclusion.stats.superiorityTeam.goals;
+                    teamBStats.asSuperior.shots += exclusion.stats.superiorityTeam.shots;
+                    
+                    teamAStats.asExcluded.events++;
+                    teamAStats.asExcluded.goals += exclusion.stats.excludedTeam.goals;
+                    teamAStats.asExcluded.shots += exclusion.stats.excludedTeam.shots;
+                }
+            });
+
+            teamAStats.asSuperior.efficiency = teamAStats.asSuperior.shots > 0 ? 
+                (teamAStats.asSuperior.goals / teamAStats.asSuperior.shots * 100).toFixed(1) : '0.0';
+            teamAStats.asExcluded.efficiency = teamAStats.asExcluded.shots > 0 ? 
+                (teamAStats.asExcluded.goals / teamAStats.asExcluded.shots * 100).toFixed(1) : '0.0';
+            teamBStats.asSuperior.efficiency = teamBStats.asSuperior.shots > 0 ? 
+                (teamBStats.asSuperior.goals / teamBStats.asSuperior.shots * 100).toFixed(1) : '0.0';
+            teamBStats.asExcluded.efficiency = teamBStats.asExcluded.shots > 0 ? 
+                (teamBStats.asExcluded.goals / teamBStats.asExcluded.shots * 100).toFixed(1) : '0.0';
+
+            return `
+                <div class="subsection-title">Comparación de Rendimiento en Situaciones de Exclusión</div>
+                
+                <table class="team-analysis-table" style="margin-bottom: 20px;">
+                    <thead>
+                        <tr>
+                            <th colspan="6" style="background: #2e7d32;">RENDIMIENTO EN SUPERIORIDAD (Rival Excluido)</th>
+                        </tr>
+                        <tr>
+                            <th>Equipo</th>
+                            <th>Exclusiones Rivales</th>
+                            <th>Goles Anotados</th>
+                            <th>Lanzamientos</th>
+                            <th>Eficacia (%)</th>
+                            <th>Promedio Goles/Exclusión</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>${gameData.teamA.name}</td>
+                            <td>${teamAStats.asSuperior.events}</td>
+                            <td class="${teamAStats.asSuperior.goals > teamBStats.asSuperior.goals ? 'better-value' : teamAStats.asSuperior.goals < teamBStats.asSuperior.goals ? 'worse-value' : ''}">${teamAStats.asSuperior.goals}</td>
+                            <td>${teamAStats.asSuperior.shots}</td>
+                            <td class="${parseFloat(teamAStats.asSuperior.efficiency) > parseFloat(teamBStats.asSuperior.efficiency) ? 'better-value' : parseFloat(teamAStats.asSuperior.efficiency) < parseFloat(teamBStats.asSuperior.efficiency) ? 'worse-value' : ''}">${teamAStats.asSuperior.efficiency}%</td>
+                            <td>${teamAStats.asSuperior.events > 0 ? (teamAStats.asSuperior.goals / teamAStats.asSuperior.events).toFixed(1) : '0.0'}</td>
+                        </tr>
+                        <tr>
+                            <td>${gameData.teamB.name}</td>
+                            <td>${teamBStats.asSuperior.events}</td>
+                            <td class="${teamBStats.asSuperior.goals > teamAStats.asSuperior.goals ? 'better-value' : teamBStats.asSuperior.goals < teamAStats.asSuperior.goals ? 'worse-value' : ''}">${teamBStats.asSuperior.goals}</td>
+                            <td>${teamBStats.asSuperior.shots}</td>
+                            <td class="${parseFloat(teamBStats.asSuperior.efficiency) > parseFloat(teamAStats.asSuperior.efficiency) ? 'better-value' : parseFloat(teamBStats.asSuperior.efficiency) < parseFloat(teamAStats.asSuperior.efficiency) ? 'worse-value' : ''}">${teamBStats.asSuperior.efficiency}%</td>
+                            <td>${teamBStats.asSuperior.events > 0 ? (teamBStats.asSuperior.goals / teamBStats.asSuperior.events).toFixed(1) : '0.0'}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <table class="team-analysis-table">
+                    <thead>
+                        <tr>
+                            <th colspan="6" style="background: #c62828;">RENDIMIENTO EN INFERIORIDAD (Propio Equipo Excluido)</th>
+                        </tr>
+                        <tr>
+                            <th>Equipo</th>
+                            <th>Exclusiones Propias</th>
+                            <th>Goles Anotados</th>
+                            <th>Lanzamientos</th>
+                            <th>Eficacia (%)</th>
+                            <th>Goles Recibidos</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>${gameData.teamA.name}</td>
+                            <td>${teamAStats.asExcluded.events}</td>
+                            <td class="${teamAStats.asExcluded.goals > teamBStats.asExcluded.goals ? 'better-value' : teamAStats.asExcluded.goals < teamBStats.asExcluded.goals ? 'worse-value' : ''}">${teamAStats.asExcluded.goals}</td>
+                            <td>${teamAStats.asExcluded.shots}</td>
+                            <td class="${parseFloat(teamAStats.asExcluded.efficiency) > parseFloat(teamBStats.asExcluded.efficiency) ? 'better-value' : parseFloat(teamAStats.asExcluded.efficiency) < parseFloat(teamBStats.asExcluded.efficiency) ? 'worse-value' : ''}">${teamAStats.asExcluded.efficiency}%</td>
+                            <td class="${teamBStats.asSuperior.goals < teamAStats.asSuperior.goals ? 'better-value' : teamBStats.asSuperior.goals > teamAStats.asSuperior.goals ? 'worse-value' : ''}">${teamBStats.asSuperior.goals}</td>
+                        </tr>
+                        <tr>
+                            <td>${gameData.teamB.name}</td>
+                            <td>${teamBStats.asExcluded.events}</td>
+                            <td class="${teamBStats.asExcluded.goals > teamAStats.asExcluded.goals ? 'better-value' : teamBStats.asExcluded.goals < teamAStats.asExcluded.goals ? 'worse-value' : ''}">${teamBStats.asExcluded.goals}</td>
+                            <td>${teamBStats.asExcluded.shots}</td>
+                            <td class="${parseFloat(teamBStats.asExcluded.efficiency) > parseFloat(teamAStats.asExcluded.efficiency) ? 'better-value' : parseFloat(teamBStats.asExcluded.efficiency) < parseFloat(teamAStats.asExcluded.efficiency) ? 'worse-value' : ''}">${teamBStats.asExcluded.efficiency}%</td>
+                            <td class="${teamAStats.asSuperior.goals < teamBStats.asSuperior.goals ? 'better-value' : teamAStats.asSuperior.goals > teamBStats.asSuperior.goals ? 'worse-value' : ''}">${teamAStats.asSuperior.goals}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            `;
+        }
+
+        function generateTimeoutsAnalysisSection() {
+            if (gameData.timeouts.length === 0) {
+                return '';
+            }
+
+            let timeoutsHtml = `
+                <div class="report-section">
+                    <div class="section-title">⏸️ ANÁLISIS DE TIME OUTS</div>
+                    <div class="subsection-title">Impacto de los Tiempos Muertos Solicitados</div>
+            `;
+
+            gameData.timeouts.forEach((timeout, index) => {
+                const scoreDiffBefore = timeout.scoreBefore.teamA - timeout.scoreBefore.teamB;
+                const scoreDiffAfter = timeout.scoreAfter.teamA - timeout.scoreAfter.teamB;
+                
+                let situationBefore = '';
+                if (timeout.team === 'A') {
+                    if (scoreDiffBefore > 0) situationBefore = 'Ganando';
+                    else if (scoreDiffBefore < 0) situationBefore = 'Perdiendo';
+                    else situationBefore = 'Empate';
+                } else {
+                    if (scoreDiffBefore < 0) situationBefore = 'Ganando';
+                    else if (scoreDiffBefore > 0) situationBefore = 'Perdiendo';
+                    else situationBefore = 'Empate';
+                }
+
+                let scoreChange = '';
+                let impactClass = 'timeout-impact-neutral';
+                
+                if (timeout.team === 'A') {
+                    const changeA = timeout.scoreAfter.teamA - timeout.scoreBefore.teamA;
+                    const changeB = timeout.scoreAfter.teamB - timeout.scoreBefore.teamB;
+                    const netChange = changeA - changeB;
+                    
+                    if (netChange > 0) {
+                        scoreChange = `+${netChange} a favor`;
+                        impactClass = 'timeout-impact-positive';
+                    } else if (netChange < 0) {
+                        scoreChange = `${netChange} en contra`;
+                        impactClass = 'timeout-impact-negative';
+                    } else {
+                        scoreChange = 'Sin cambios';
+                    }
+                } else {
+                    const changeB = timeout.scoreAfter.teamB - timeout.scoreBefore.teamB;
+                    const changeA = timeout.scoreAfter.teamA - timeout.scoreBefore.teamA;
+                    const netChange = changeB - changeA;
+                    
+                    if (netChange > 0) {
+                        scoreChange = `+${netChange} a favor`;
+                        impactClass = 'timeout-impact-positive';
+                    } else if (netChange < 0) {
+                        scoreChange = `${netChange} en contra`;
+                        impactClass = 'timeout-impact-negative';
+                    } else {
+                        scoreChange = 'Sin cambios';
+                    }
+                }
+
+                let eventsHtml = '';
+                if (timeout.nextEvents.length === 0) {
+                    eventsHtml = '<p style="color: #999; font-style: italic; padding: 10px;">No hay eventos registrados después de este time out</p>';
+                } else {
+                    timeout.nextEvents.forEach((evt, evtIndex) => {
+                        const actionsText = evt.actions.map(action => {
+                            const actionMap = {
+                                'gol': '⚽ GOL',
+                                'parada': '🧤 Parada',
+                                'poste_fuera': '❌ Poste/Fuera',
+                                'perdida': '📉 Pérdida',
+                                'error_tecnico': '⚠️ Error Técnico',
+                                'exclusion': '✌️ Exclusión',
+                                'contraataque': '⚡ Contraataque',
+                                'posicional': '🔄 Posicional',
+                                '7m': '7M',
+                                '6m': '6M',
+                                '9m': '9M',
+                                'superioridad': 'Superioridad',
+                                'inferioridad': 'Inferioridad'
+                            };
+                            return actionMap[action] || action;
+                        }).join(', ');
+                        
+                        eventsHtml += `
+                            <div class="timeout-event-item">
+                                <strong>Evento ${evtIndex + 1}</strong> (${formatTime(evt.gameTime)}) - 
+                                ${evt.teamName}: ${actionsText}
+                                ${evt.position ? ` - Posición ${evt.position}` : ''}
+                            </div>
+                        `;
+                    });
+                }
+
+                timeoutsHtml += `
+                    <div class="timeout-card">
+                        <div class="timeout-header">
+                            Time Out #${index + 1} - ${timeout.teamName}
+                        </div>
+                        
+                        <div class="timeout-info">
+                            <div class="timeout-info-item">
+                                <div class="timeout-info-label">Minuto</div>
+                                <div class="timeout-info-value">${formatTime(timeout.gameTime)}</div>
+                            </div>
+                            <div class="timeout-info-item">
+                                <div class="timeout-info-label">Marcador en ese momento</div>
+                                <div class="timeout-info-value">${timeout.scoreBefore.teamA} - ${timeout.scoreBefore.teamB}</div>
+                            </div>
+                            <div class="timeout-info-item">
+                                <div class="timeout-info-label">Situación</div>
+                                <div class="timeout-info-value">${situationBefore}</div>
+                            </div>
+                        </div>
+
+                        <div class="timeout-events">
+                            <div class="timeout-events-title">📋 Siguientes 5 eventos desde el Time Out</div>
+                            ${eventsHtml}
+                        </div>
+
+                        <div class="timeout-impact">
+                            <div class="timeout-impact-item">
+                                <div class="timeout-impact-label">Marcador tras 5 eventos</div>
+                                <div class="timeout-impact-value">${timeout.scoreAfter.teamA} - ${timeout.scoreAfter.teamB}</div>
+                            </div>
+                            <div class="timeout-impact-item">
+                                <div class="timeout-impact-label">Impacto</div>
+                                <div class="timeout-impact-value ${impactClass}">${scoreChange}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            timeoutsHtml += `</div>`;
+            return timeoutsHtml;
+        }
+
+        function generateGoalkeeperAnalysis() {
+            return `
+                <div class="report-section">
+                    <div class="section-title">🥅 ANÁLISIS DE PORTEROS</div>
+                    
+                    <div class="subsection-title">Estadísticas Individuales por Portero</div>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Equipo</th>
+                                <th>Portero</th>
+                                <th>Lanzamientos Recibidos</th>
+                                <th>Paradas</th>
+                                <th>Goles Encajados</th>
+                                <th>% Paradas</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${generateGoalkeeperTable(gameData.teamA, 'A')}
+                            ${generateGoalkeeperTable(gameData.teamB, 'B')}
+                        </tbody>
+                    </table>
+                    
+                    <div class="subsection-title">Comparativa de Porteros Activos</div>
+                    <table class="team-analysis-table">
+                        <thead>
+                            <tr>
+                                <th>Equipo</th>
+                                <th>Portero Activo</th>
+                                <th>Eficacia (%)</th>
+                                <th>Lanzamientos</th>
+                                <th>Paradas</th>
+                                <th>Goles</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${generateActiveGoalkeeperComparison()}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function generateGoalkeeperTable(team, teamKey) {
+            let rows = '';
+            
+            Object.keys(team.goalkeepers).forEach(gkNumber => {
+                const gk = team.goalkeepers[gkNumber];
+                const savePercentage = gk.shots_faced > 0 ? 
+                    ((gk.saves / gk.shots_faced) * 100).toFixed(1) : '0.0';
+                const isActive = team.currentGoalkeeper === gkNumber;
+                const statusClass = isActive ? 'better-value' : '';
+                const status = isActive ? 'EN CAMPO' : 'SUPLENTE';
+                
+                rows += `
+                    <tr>
+                        <td>${team.name}</td>
+                        <td>${gk.name}</td>
+                        <td>${gk.shots_faced}</td>
+                        <td>${gk.saves}</td>
+                        <td>${gk.goals_conceded}</td>
+                        <td>${savePercentage}%</td>
+                        <td class="${statusClass}">${status}</td>
+                    </tr>
+                `;
+            });
+            
+            return rows;
+        }
+
+        function generateActiveGoalkeeperComparison() {
+            let rows = '';
+            
+            [gameData.teamA, gameData.teamB].forEach(team => {
+                if (team.currentGoalkeeper) {
+                    const gk = team.goalkeepers[team.currentGoalkeeper];
+                    const savePercentage = gk.shots_faced > 0 ? 
+                        ((gk.saves / gk.shots_faced) * 100).toFixed(1) : '0.0';
+                    
+                    rows += `
+                        <tr>
+                            <td>${team.name}</td>
+                            <td>${gk.name}</td>
+                            <td>${savePercentage}%</td>
+                            <td>${gk.shots_faced}</td>
+                            <td>${gk.saves}</td>
+                            <td>${gk.goals_conceded}</td>
+                        </tr>
+                    `;
+                } else {
+                    rows += `
+                        <tr>
+                            <td>${team.name}</td>
+                            <td colspan="5" style="text-align: center; font-style: italic; color: #666;">Sin portero seleccionado</td>
+                        </tr>
+                    `;
+                }
+            });
+            
+            return rows;
+        }
+
+        function generateComparisonSection() {
+            const teamA = gameData.teamA;
+            const teamB = gameData.teamB;
+            
+            const compareStats = [
+                { key: 'gf_recibidos', label: 'GF Recibidos', negative: true },
+                { key: 'exclusiones', label: 'Exclusiones', negative: true },
+                { key: 'paradas', label: 'Paradas', negative: false },
+                { key: 'perdidas', label: 'Pérdidas', negative: true },
+                { key: 'posesiones', label: 'Posesiones', negative: false },
+                { key: 'lanzamientos_7m', label: 'Lanzamientos 7M', negative: false },
+                { key: 'goles_superioridad', label: 'Goles Superioridad', negative: false },
+                { key: 'contraataques', label: 'Contraataques', negative: false },
+                { key: 'goles_6m', label: 'Goles 6M', negative: false },
+                { key: 'goles_9m', label: 'Goles 9M', negative: false },
+                { key: 'errores_tecnicos', label: 'Errores Técnicos', negative: true },
+                { key: 'rechaces', label: 'Rechaces', negative: false },
+                { key: 'goles_2x2', label: 'Goles 2x2', negative: false },
+                { key: 'lanzamientos_2x2', label: 'Lanzamientos 2x2', negative: false }
+            ];
+
+            let tableRows = '';
+            compareStats.forEach(stat => {
+                const valueA = teamA.stats[stat.key] || 0;
+                const valueB = teamB.stats[stat.key] || 0;
+                
+                let classA = '', classB = '';
+                if (valueA !== valueB) {
+                    if (stat.negative) {
+                        classA = valueA < valueB ? 'better-value' : 'worse-value';
+                        classB = valueB < valueA ? 'better-value' : 'worse-value';
+                    } else {
+                        classA = valueA > valueB ? 'better-value' : 'worse-value';
+                        classB = valueB > valueA ? 'better-value' : 'worse-value';
+                    }
+                }
+                
+                tableRows += `
+                    <tr>
+                        <td class="${classA}">${valueA}</td>
+                        <td>${stat.label}</td>
+                        <td class="${classB}">${valueB}</td>
+                    </tr>
+                `;
+            });
+
+            const eficaciaA = teamA.stats.lanzamientos > 0 ? (teamA.stats.goles / teamA.stats.lanzamientos * 100).toFixed(1) : '0.0';
+            const eficaciaB = teamB.stats.lanzamientos > 0 ? (teamB.stats.goles / teamB.stats.lanzamientos * 100).toFixed(1) : '0.0';
+            let eficaciaClassA = '', eficaciaClassB = '';
+            if (parseFloat(eficaciaA) > parseFloat(eficaciaB)) {
+                eficaciaClassA = 'better-value'; eficaciaClassB = 'worse-value';
+            } else if (parseFloat(eficaciaB) > parseFloat(eficaciaA)) {
+                eficaciaClassB = 'better-value'; eficaciaClassA = 'worse-value';
+            }
+
+            const eficacia7MA = teamA.stats.lanzamientos_7m > 0 ? (teamA.stats.goles_7m / teamA.stats.lanzamientos_7m * 100).toFixed(1) : '0.0';
+            const eficacia7MB = teamB.stats.lanzamientos_7m > 0 ? (teamB.stats.goles_7m / teamB.stats.lanzamientos_7m * 100).toFixed(1) : '0.0';
+            let eficacia7MClassA = '', eficacia7MClassB = '';
+            if (parseFloat(eficacia7MA) > parseFloat(eficacia7MB)) {
+                eficacia7MClassA = 'better-value'; eficacia7MClassB = 'worse-value';
+            } else if (parseFloat(eficacia7MB) > parseFloat(eficacia7MA)) {
+                eficacia7MClassB = 'better-value'; eficacia7MClassA = 'worse-value';
+            }
+
+            const eficacia2x2A = teamA.stats.lanzamientos_2x2 > 0 ? (teamA.stats.goles_2x2 / teamA.stats.lanzamientos_2x2 * 100).toFixed(1) : '0.0';
+            const eficacia2x2B = teamB.stats.lanzamientos_2x2 > 0 ? (teamB.stats.goles_2x2 / teamB.stats.lanzamientos_2x2 * 100).toFixed(1) : '0.0';
+            let eficacia2x2ClassA = '', eficacia2x2ClassB = '';
+            if (parseFloat(eficacia2x2A) > parseFloat(eficacia2x2B)) {
+                eficacia2x2ClassA = 'better-value'; eficacia2x2ClassB = 'worse-value';
+            } else if (parseFloat(eficacia2x2B) > parseFloat(eficacia2x2A)) {
+                eficacia2x2ClassB = 'better-value'; eficacia2x2ClassA = 'worse-value';
+            }
+
+            const totalLanzamientosContraA = teamB.stats.lanzamientos;
+            const paradasA = teamA.stats.paradas;
+            const eficaciaParadasA = totalLanzamientosContraA > 0 ? (paradasA / totalLanzamientosContraA * 100).toFixed(1) : '0.0';
+            const totalLanzamientosContraB = teamA.stats.lanzamientos;
+            const paradasB = teamB.stats.paradas;
+            const eficaciaParadasB = totalLanzamientosContraB > 0 ? (paradasB / totalLanzamientosContraB * 100).toFixed(1) : '0.0';
+            let eficaciaParadasClassA = '', eficaciaParadasClassB = '';
+            if (parseFloat(eficaciaParadasA) > parseFloat(eficaciaParadasB)) {
+                eficaciaParadasClassA = 'better-value'; eficaciaParadasClassB = 'worse-value';
+            } else if (parseFloat(eficaciaParadasB) > parseFloat(eficaciaParadasA)) {
+                eficaciaParadasClassB = 'better-value'; eficaciaParadasClassA = 'worse-value';
+            }
+
+            const ceoA = teamA.stats.posesiones > 0 ? (teamA.stats.goles * 100 / teamA.stats.posesiones).toFixed(1) : '0.0';
+            const ceoB = teamB.stats.posesiones > 0 ? (teamB.stats.goles * 100 / teamB.stats.posesiones).toFixed(1) : '0.0';
+            let ceoClassA = '', ceoClassB = '';
+            if (parseFloat(ceoA) > parseFloat(ceoB)) {
+                ceoClassA = 'better-value'; ceoClassB = 'worse-value';
+            } else if (parseFloat(ceoB) > parseFloat(ceoA)) {
+                ceoClassB = 'better-value'; ceoClassA = 'worse-value';
+            }
+
+            const croA = teamA.stats.lanzamientos > 0 ? (teamA.stats.goles * 100 / teamA.stats.lanzamientos).toFixed(1) : '0.0';
+            const croB = teamB.stats.lanzamientos > 0 ? (teamB.stats.goles * 100 / teamB.stats.lanzamientos).toFixed(1) : '0.0';
+            let croClassA = '', croClassB = '';
+            if (parseFloat(croA) > parseFloat(croB)) {
+                croClassA = 'better-value'; croClassB = 'worse-value';
+            } else if (parseFloat(croB) > parseFloat(croA)) {
+                croClassB = 'better-value'; croClassA = 'worse-value';
+            }
+
+            tableRows += `
+                <tr>
+                    <td class="${eficaciaClassA}">${eficaciaA}%</td>
+                    <td>Eficacia Ataque</td>
+                    <td class="${eficaciaClassB}">${eficaciaB}%</td>
+                </tr>
+                <tr>
+                    <td class="${eficacia7MClassA}">${eficacia7MA}%</td>
+                    <td>Eficacia 7M</td>
+                    <td class="${eficacia7MClassB}">${eficacia7MB}%</td>
+                </tr>
+                <tr>
+                    <td class="${eficacia2x2ClassA}">${eficacia2x2A}%</td>
+                    <td>Eficacia 2x2</td>
+                    <td class="${eficacia2x2ClassB}">${eficacia2x2B}%</td>
+                </tr>
+                <tr>
+                    <td class="${eficaciaParadasClassA}">${eficaciaParadasA}%</td>
+                    <td>Eficacia Paradas</td>
+                    <td class="${eficaciaParadasClassB}">${eficaciaParadasB}%</td>
+                </tr>
+                <tr>
+                    <td class="${ceoClassA}">${ceoA}</td>
+                    <td>CEO (Coeficiente Eficacia Ofensiva)</td>
+                    <td class="${ceoClassB}">${ceoB}</td>
+                </tr>
+                <tr>
+                    <td class="${croClassA}">${croA}</td>
+                    <td>CRO (Coeficiente Resolución Ofensiva)</td>
+                    <td class="${croClassB}">${croB}</td>
+                </tr>
+            `;
+
+            return `
+                <div class="report-section">
+                    <div class="section-title">COMPARATIVA GENERAL</div>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>${teamA.name}</th>
+                                <th>ESTADÍSTICA</th>
+                                <th>${teamB.name}</th>
+                            </tr>
+                        </thead>
+                        <tbody>${tableRows}</tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function generateTeamAnalysis(teamKey, team, type) {
+            return `
+                <div class="report-section">
+                    <div class="section-title">ANÁLISIS ${type}: ${team.name}</div>
+                    
+                    <div class="subsection-title">Resumen General</div>
+                    <table class="team-analysis-table">
+                        <thead>
+                            <tr>
+                                <th>Lanzamientos</th><th>Goles</th><th>Paradas</th><th>Poste/Fuera</th><th>Efectividad</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>${team.stats.lanzamientos}</td>
+                                <td>${team.stats.goles}</td>
+                                <td>${team.stats.paradas}</td>
+                                <td>${team.stats.poste_fuera}</td>
+                                <td>${team.stats.lanzamientos > 0 ? (team.stats.goles / team.stats.lanzamientos * 100).toFixed(1) : '0.0'}%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="subsection-title">Por Tipo de Ataque</div>
+                    <table class="team-analysis-table">
+                        <thead>
+                            <tr>
+                                <th>Tipo</th><th>Lanzamientos</th><th>Goles</th><th>Paradas</th><th>Poste/Fuera</th><th>Efectividad</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${generateDetailTable(team.stats.ataques, ['Contraataque', 'Posicional', 'Posicional 7x6', 'Campo Contrario'])}
+                        </tbody>
+                    </table>
+
+                    <div class="subsection-title">Por Defensa Rival</div>
+                    <table class="team-analysis-table">
+                        <thead>
+                            <tr>
+                                <th>Tipo de Defensa</th><th>Lanzamientos</th><th>Goles</th><th>Paradas</th><th>Poste/Fuera</th><th>Efectividad</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${generateDetailTable(team.stats.defensas, ['6:0', '5:1', 'Otros'])}
+                        </tbody>
+                    </table>
+
+                    <div class="subsection-title">Por Zona de Lanzamiento</div>
+                    <table class="team-analysis-table">
+                        <thead>
+                            <tr>
+                                <th>Zona</th><th>Lanzamientos</th><th>Goles</th><th>Paradas</th><th>Poste/Fuera</th><th>Efectividad</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${generateDetailTable(team.stats.zonas, ['6M', '9M', '7M'])}
+                        </tbody>
+                    </table>
+
+                    <div class="subsection-title">Por Tipo de Lanzamiento</div>
+                    <table class="team-analysis-table">
+                        <thead>
+                            <tr>
+                                <th>Tipo</th><th>Lanzamientos</th><th>Goles</th><th>Paradas</th><th>Poste/Fuera</th><th>Efectividad</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${generateDetailTable(team.stats.acciones, ['Salto', 'Apoyo', 'Penetración', 'Finta', 'Habilidad', 'Fly'])}
+                        </tbody>
+                    </table>
+
+                    <div class="subsection-title">Por Posición en Campo</div>
+                    <table class="team-analysis-table">
+                        <thead>
+                            <tr>
+                                <th>Posición</th><th>Lanzamientos</th><th>Goles</th><th>Paradas</th><th>Poste/Fuera</th><th>Efectividad</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${generateDetailTable(team.stats.posiciones, ['A', 'B', 'C', 'D', 'E', 'F'])}
+                        </tbody>
+                    </table>
+
+                    <div class="subsection-title">Por Situación Numérica</div>
+                    <table class="team-analysis-table">
+                        <thead>
+                            <tr>
+                                <th>Situación</th><th>Lanzamientos</th><th>Goles</th><th>Paradas</th><th>Poste/Fuera</th><th>Efectividad</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${generateDetailTable(team.stats.situaciones, ['Superioridad', 'Igualdad', 'Inferioridad', '2x2'])}
+                        </tbody>
+                    </table>
+
+                    <div class="subsection-title">🛡️ Distribución de Golpes Francos por Zona</div>
+                    <table class="team-analysis-table">
+                        <thead>
+                            <tr>
+                                <th>Zona</th><th>Golpes Francos</th><th>Porcentaje</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${generateFreeThrowDistributionTable(team)}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function generateDetailTable(data, labels) {
+            const keys = Object.keys(data);
+            let rows = '';
+            
+            keys.forEach((key, index) => {
+                const item = data[key];
+                const efectividad = item.lanzamientos > 0 ? (item.goles / item.lanzamientos * 100).toFixed(1) : '0.0';
+                rows += `
+                    <tr>
+                        <td>${labels[index] || key.toUpperCase()}</td>
+                        <td>${item.lanzamientos}</td>
+                        <td>${item.goles}</td>
+                        <td>${item.paradas}</td>
+                        <td>${item.poste_fuera}</td>
+                        <td>${efectividad}%</td>
+                    </tr>
+                `;
+            });
+            return rows;
+        }
+
+        function generateFreeThrowDistributionTable(team) {
+            const positions = [
+                { key: 'A', label: 'A', description: 'Lateral Izquierdo' },
+                { key: 'B', label: 'B', description: 'Central' },
+                { key: 'C', label: 'C', description: 'Lateral Derecho' },
+                { key: 'D', label: 'D', description: 'Extremo Derecho' },
+                { key: 'E', label: 'E', description: 'Pivote' },
+                { key: 'F', label: 'F', description: 'Extremo Izquierdo' }
+            ];
+            
+            let rows = '';
+            let totalGolpesFranco = 0;
+            
+            positions.forEach(position => {
+                if (team.stats.golpes_franco_por_posicion && team.stats.golpes_franco_por_posicion[position.key]) {
+                    totalGolpesFranco += team.stats.golpes_franco_por_posicion[position.key];
+                }
+            });
+            
+            positions.forEach((position) => {
+                const count = (team.stats.golpes_franco_por_posicion && team.stats.golpes_franco_por_posicion[position.key]) ? team.stats.golpes_franco_por_posicion[position.key] : 0;
+                const porcentaje = totalGolpesFranco > 0 ? ((count / totalGolpesFranco) * 100).toFixed(1) : '0.0';
+                
+                rows += `
+                    <tr>
+                        <td>${position.label} (${position.description})</td>
+                        <td>${count}</td>
+                        <td>${porcentaje}%</td>
+                    </tr>
+                `;
+            });
+            
+            rows += `
+                <tr style="background: #ffebee; font-weight: bold;">
+                    <td>TOTAL</td>
+                    <td>${totalGolpesFranco}</td>
+                    <td>100.0%</td>
+                </tr>
+            `;
+            
+            return rows;
+        }
+
+        function generateTimeStatisticsSection() {
+            if (gameData.goals.length === 0) {
+                return `
+                    <div class="report-section">
+                        <div class="section-title">⏰ ESTADÍSTICAS POR TIEMPO</div>
+                        <div class="timeline-container">
+                            <div class="timeline-header">CRONOGRAMA DE GOLES</div>
+                            <p style="text-align: center; color: #666; font-style: italic; padding: 20px;">
+                                No se han registrado goles en este partido.
+                            </p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="report-section">
+                    <div class="section-title">⏰ ESTADÍSTICAS POR TIEMPO</div>
+                    ${generateGoalsTimeline()}
+                    ${generateTimeIntervalsAnalysis()}
+                </div>
+            `;
+        }
+
+        function generateGoalsTimeline() {
+            let timelineHtml = `
+                <div class="timeline-container">
+                    <div class="timeline-header">CRONOGRAMA DE GOLES</div>
+                    <div class="timeline-goals">
+            `;
+
+            const sortedGoals = gameData.goals.sort((a, b) => a.gameTime - b.gameTime);
+            
+            sortedGoals.forEach(goal => {
+                const minutes = Math.floor(goal.gameTime / 60);
+                const seconds = goal.gameTime % 60;
+                const timeStr = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                const teamClass = goal.team === 'A' ? '' : 'team-b';
+                
+                timelineHtml += `
+                    <div class="goal-marker ${teamClass}">
+                        ${goal.teamName} - ${timeStr}
+                    </div>
+                `;
+            });
+
+            timelineHtml += `
+                    </div>
+                </div>
+            `;
+
+            return timelineHtml;
+        }
+
+        function generateTimeIntervalsAnalysis() {
+            const intervals = [
+                { start: 0, end: 600, label: '0-10 min' },
+                { start: 600, end: 1200, label: '10-20 min' },
+                { start: 1200, end: 1800, label: '20-30 min' },
+                { start: 1800, end: 2400, label: '30-40 min' },
+                { start: 2400, end: 3000, label: '40-50 min' },
+                { start: 3000, end: 3600, label: '50-60 min' }
+            ];
+
+            let tableRows = '';
+            
+            intervals.forEach(interval => {
+                const eventsInInterval = gameData.events.filter(event => 
+                    event.gameTime >= interval.start && event.gameTime < interval.end
+                );
+                
+                let teamAGoals = 0, teamBGoals = 0;
+                let teamAShots = 0, teamBShots = 0;
+                
+                eventsInInterval.forEach(event => {
+                    const actions = event.actions[event.team] || [];
+                    const isGoal = actions.includes('gol');
+                    const isShot = isGoal || actions.includes('parada') || actions.includes('poste_fuera');
+                    
+                    if (event.team === 'A') {
+                        if (isGoal) teamAGoals++;
+                        if (isShot) teamAShots++;
+                    } else {
+                        if (isGoal) teamBGoals++;
+                        if (isShot) teamBShots++;
+                    }
+                });
+                
+                const teamAEfficiency = teamAShots > 0 ? (teamAGoals / teamAShots * 100).toFixed(1) : '0.0';
+                const teamBEfficiency = teamBShots > 0 ? (teamBGoals / teamBShots * 100).toFixed(1) : '0.0';
+                
+                let teamAClass = '', teamBClass = '';
+                if (teamAGoals > teamBGoals) {
+                    teamAClass = 'better-value'; teamBClass = 'worse-value';
+                } else if (teamBGoals > teamAGoals) {
+                    teamBClass = 'better-value'; teamAClass = 'worse-value';
+                }
+                
+                tableRows += `
+                    <tr>
+                        <td style="font-weight: bold;">${interval.label}</td>
+                        <td class="${teamAClass}">${teamAGoals}</td>
+                        <td>${teamAShots}</td>
+                        <td>${teamAEfficiency}%</td>
+                        <td class="${teamBClass}">${teamBGoals}</td>
+                        <td>${teamBShots}</td>
+                        <td>${teamBEfficiency}%</td>
+                    </tr>
+                `;
+            });
+
+            return `
+                <div class="subsection-title">Análisis por Intervalos de Tiempo</div>
+                <table class="time-intervals-table">
+                    <thead>
+                        <tr>
+                            <th rowspan="2">Intervalo</th>
+                            <th colspan="3" style="background: #4CAF50;">${gameData.teamA.name}</th>
+                            <th colspan="3" style="background: #2196F3;">${gameData.teamB.name}</th>
+                        </tr>
+                        <tr>
+                            <th style="background: #66BB6A;">Goles</th>
+                            <th style="background: #66BB6A;">Lanzam.</th>
+                            <th style="background: #66BB6A;">Eficacia</th>
+                            <th style="background: #42A5F5;">Goles</th>
+                            <th style="background: #42A5F5;">Lanzam.</th>
+                            <th style="background: #42A5F5;">Eficacia</th>
+                        </tr>
+                    </thead>
+                    <tbody>${tableRows}</tbody>
+                </table>
+            `;
+        }
+
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+        function exportToVisualPDF() {
+            try {
+                if (isMobileDevice()) {
+                    showPDFStatus('Abriendo versión para imprimir (compatible con móviles)...', 'success');
+                    
+                    const reportContent = document.getElementById('reportContent').cloneNode(true);
+                    const newWindow = window.open('', '_blank');
+                    
+                    newWindow.document.write(`
+                        <!DOCTYPE html>
+                        <html>
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                            <title>Informe - ${gameData.teamA.name} vs ${gameData.teamB.name}</title>
+                            <style>
+                                * { margin: 0; padding: 0; box-sizing: border-box; }
+                                body { 
+                                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                                    line-height: 1.4; color: #333; padding: 20px;
+                                    background: white !important;
+                                }
+                                .report-title {
+                                    background: #2c3e50; color: white; padding: 15px;
+                                    text-align: center; font-size: 18px; font-weight: bold;
+                                    margin-bottom: 20px; border-radius: 8px;
+                                }
+                                .section-title {
+                                    background: #34495e; color: white; padding: 10px 15px;
+                                    font-size: 16px; font-weight: bold; margin-bottom: 15px;
+                                    border-radius: 5px;
+                                }
+                                .subsection-title {
+                                    background: #7f8c8d; color: white; padding: 8px 12px;
+                                    font-size: 14px; font-weight: bold; margin: 15px 0 10px 0;
+                                    border-radius: 3px;
+                                }
+                                .comparison-table, .team-analysis-table, .time-intervals-table {
+                                    width: 100%; border-collapse: collapse; margin-bottom: 20px;
+                                    border: 2px solid #2c3e50;
+                                    page-break-inside: avoid;
+                                    break-inside: avoid;
+                                }
+                                .comparison-table th, .team-analysis-table th, .time-intervals-table th {
+                                    background: #2c3e50; color: white; padding: 12px 8px;
+                                    text-align: center; font-size: 13px; font-weight: bold;
+                                }
+                                .comparison-table td, .team-analysis-table td, .time-intervals-table td {
+                                    padding: 10px 8px; text-align: center; border: 1px solid #ddd;
+                                    font-size: 12px;
+                                }
+                                .comparison-table tbody tr:nth-child(even),
+                                .team-analysis-table tbody tr:nth-child(even),
+                                .time-intervals-table tbody tr:nth-child(even) {
+                                    background: #f8f9fa;
+                                }
+                                .better-value {
+                                    background: #d4edda !important; color: #155724; font-weight: bold;
+                                }
+                                .worse-value {
+                                    background: #f8d7da !important; color: #721c24; font-weight: bold;
+                                }
+                                .timeline-container {
+                                    background: #f8f9fa; border-radius: 10px; padding: 20px;
+                                    margin-bottom: 20px;
+                                    page-break-inside: avoid;
+                                    break-inside: avoid;
+                                }
+                                .timeline-header {
+                                    background: #e74c3c; color: white; padding: 10px 15px;
+                                    border-radius: 5px; font-weight: bold; margin-bottom: 15px;
+                                    text-align: center;
+                                }
+                                .timeline-goals {
+                                    display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px;
+                                }
+                                .goal-marker {
+                                    background: #4CAF50; color: white; padding: 8px 12px;
+                                    border-radius: 20px; font-size: 11px; font-weight: bold;
+                                    white-space: nowrap;
+                                }
+                                .goal-marker.team-b { background: #2196F3; }
+                                .report-section {
+                                    margin-bottom: 25px;
+                                    page-break-inside: avoid;
+                                    break-inside: avoid;
+                                }
+                                .timeout-card {
+                                    background: white; border: 2px solid #607D8B;
+                                    border-radius: 8px; padding: 15px; margin-bottom: 15px;
+                                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                                }
+                                .timeout-header {
+                                    background: #607D8B; color: white; padding: 8px 12px;
+                                    border-radius: 5px; margin: -15px -15px 12px -15px;
+                                    font-weight: bold; font-size: 13px;
+                                }
+                                .timeout-info {
+                                    display: grid; grid-template-columns: repeat(3, 1fr);
+                                    gap: 10px; margin-bottom: 12px;
+                                }
+                                .timeout-info-item { text-align: center; }
+                                .timeout-info-label {
+                                    font-size: 10px; color: #666;
+                                    text-transform: uppercase; margin-bottom: 4px;
+                                }
+                                .timeout-info-value {
+                                    font-size: 14px; font-weight: bold; color: #2c3e50;
+                                }
+                                .timeout-events {
+                                    background: #f8f9fa; border-radius: 5px; padding: 10px;
+                                }
+                                .timeout-events-title {
+                                    font-size: 11px; font-weight: bold; color: #607D8B;
+                                    margin-bottom: 8px; text-transform: uppercase;
+                                }
+                                .timeout-event-item {
+                                    padding: 6px; margin-bottom: 4px; background: white;
+                                    border-left: 3px solid #607D8B; border-radius: 3px;
+                                    font-size: 10px;
+                                }
+                                .timeout-impact {
+                                    display: grid; grid-template-columns: 1fr 1fr;
+                                    gap: 10px; margin-top: 12px; padding-top: 12px;
+                                    border-top: 1px dashed #ddd;
+                                }
+                                .timeout-impact-item { text-align: center; }
+                                .timeout-impact-label {
+                                    font-size: 10px; color: #666; margin-bottom: 4px;
+                                }
+                                .timeout-impact-value {
+                                    font-size: 16px; font-weight: bold;
+                                }
+                                .timeout-impact-positive { color: #4CAF50; }
+                                .timeout-impact-negative { color: #f44336; }
+                                .timeout-impact-neutral { color: #FF9800; }
+                                .mobile-actions {
+                                    position: fixed; top: 10px; right: 10px; z-index: 1000;
+                                    background: white; padding: 10px; border-radius: 8px;
+                                    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+                                }
+                                .mobile-btn {
+                                    background: #4CAF50; color: white; border: none;
+                                    padding: 8px 16px; border-radius: 5px; cursor: pointer;
+                                    font-size: 14px; font-weight: bold; margin: 5px;
+                                    text-transform: uppercase;
+                                }
+                                .close-btn { background: #f44336; }
+                                @media print {
+                                    .mobile-actions { display: none !important; }
+                                    body { padding: 0 !important; }
+                                }
+                            </style>
+                        </head>
+                        <body>
+                            <div class="mobile-actions">
+                                <button class="mobile-btn" onclick="window.print()">📱 Imprimir</button>
+                                <button class="mobile-btn close-btn" onclick="window.close()">✕ Cerrar</button>
+                            </div>
+                            ${reportContent.outerHTML}
+                        </body>
+                        </html>
+                    `);
+                    
+                    newWindow.document.close();
+                    
+                    setTimeout(() => {
+                        showPDFStatus('Usa el botón "Imprimir" en la nueva ventana y selecciona "Guardar como PDF"', 'success');
+                    }, 1000);
+                    
+                    return;
+                }
+
+                showPDFStatus('Generando PDF con formato visual...', 'success');
+                
+                const opt = {
+                    margin: 10,
+                    filename: `Informe_${gameData.teamA.name}_vs_${gameData.teamB.name}_${new Date().toLocaleDateString('es-ES').replace(/\//g, '-')}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { 
+                        scale: 2,
+                        useCORS: true,
+                        allowTaint: true
+                    },
+                    jsPDF: { 
+                        unit: 'mm', 
+                        format: 'a4', 
+                        orientation: 'portrait' 
+                    }
+                };
+
+                const reportContent = document.getElementById('reportContent');
+                const exportContent = reportContent.cloneNode(true);
+                exportContent.classList.add('pdf-export-content');
+                
+                const tempContainer = document.createElement('div');
+                tempContainer.style.position = 'absolute';
+                tempContainer.style.left = '-9999px';
+                tempContainer.style.top = '-9999px';
+                tempContainer.style.width = '210mm';
+                tempContainer.appendChild(exportContent);
+                document.body.appendChild(tempContainer);
+
+                html2pdf().set(opt).from(exportContent).save().then(() => {
+                    showPDFStatus('PDF exportado correctamente con formato visual', 'success');
+                    document.body.removeChild(tempContainer);
+                }).catch((error) => {
+                    console.error('Error al generar PDF:', error);
+                    showPDFStatus('Error al generar el PDF', 'error');
+                    document.body.removeChild(tempContainer);
+                });
+
+            } catch (error) {
+                console.error('Error al exportar PDF:', error);
+                showPDFStatus('Error al exportar el PDF', 'error');
+            }
+        }
+
+        function showPDFStatus(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `pdf-status ${type}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        function closeReport() {
+            document.getElementById('reportModal').style.display = 'none';
+        }
+
+        // Inicialización del documento
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeHandballApp();
+        });
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('reportModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
